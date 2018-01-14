@@ -1,27 +1,48 @@
 <template>
+<span>
   <div class="products">
-    <div v-for="product in products">
-      <h1 v-bind:key="product.id">{{product.name}}</h1>
+    <div v-for="product in products" :key="product.id">
+      <h1 >{{product.name}}</h1>
     </div>
-</div>
+  </div>
+  <div class="shipments">
+    <div v-for="shipment in shipments" :key="shipment.id">
+      <h1 >{{shipment.adjusted_ordered_at}}</h1>
+      <h1 >{{shipment.fulfillments[0].instance.product.name}}</h1>
+
+    </div>
+  </div>
+  <UpcomingShipments></UpcomingShipments>
+</span>
 </template>
 
 <script>
-import ProductsService from "@/services/ProductsService";
+import Api from "@/services/ApiServices";
+import UpcomingShipments from "./UpcomingShipments";
+
 export default {
-  name: "products",
+  name: "dashboard",
+  components: {
+    UpcomingShipments
+  },
   data() {
     return {
-      products: []
+      products: [],
+      shipments: {}
     };
   },
   mounted() {
     this.getProducts();
+    this.getShipments();
   },
   methods: {
     async getProducts() {
-      const response = await ProductsService.fetchProducts();
+      const response = await Api.fetchProducts();
       this.products = response.data.products;
+    },
+    async getShipments() {
+      const response = await Api.fetchShipments();
+      this.shipments = response.data.shipments;
     }
   }
 };

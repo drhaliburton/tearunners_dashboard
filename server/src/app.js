@@ -11,14 +11,26 @@ app.use(cors())
 const mongodb_conn_module = require('./mongodbConnModule');
 var db = mongodb_conn_module.connect();
 
-var Product = require("../models/product");
+var Products = require("../models/product");
+var Shipments = require("../models/shipment");
+
 
 app.get('/products', (req, res) => {
-	Product.find({}, function (error, products) {
+	Products.find({}, function (error, products) {
 		if (error) { console.error(error); }
 		console.log(products);
 		res.send({
 			products: products
+		})
+	}).sort({ _id: -1 })
+})
+
+app.get('/shipments', (req, res) => {
+	Shipments.find({}, function (error, shipments) {
+		if (error) { console.error(error); }
+		console.log(shipments);
+		res.send({
+			shipments: shipments
 		})
 	}).sort({ _id: -1 })
 })

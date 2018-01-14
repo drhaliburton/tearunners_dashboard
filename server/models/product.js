@@ -148,5 +148,5 @@ var ProductSchema = new Schema({
 }
 );
 
-var Product = mongoose.model("Product", ProductSchema);
-module.exports = Product;
+var Products = mongoose.model("Product", ProductSchema);
+module.exports = Products;
