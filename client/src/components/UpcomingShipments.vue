@@ -1,6 +1,6 @@
 <template>
 
-  <span>
+  <div class="upcoming-shipments">
     {{this.countUpcomingShipments(shipments)}}
 
       <table class="u-full-width" v-for="month in productCount" :key="month.id">
@@ -19,7 +19,7 @@
         </tr>
       </tbody>
     </table>
-  </span>
+  </div>
 </template>
 
 <script>
@@ -92,6 +92,13 @@ export default {
 };
 </script>
 <style type="text/css">
+.upcoming-shipments {
+  padding: 2rem;
+  margin: auto;
+  width: 80%;
+  border: 1px solid #e1e1e1;
+  border-radius: 10px;
+}
 .product-name {
   font-weight: 600;
   padding: 2rem;
