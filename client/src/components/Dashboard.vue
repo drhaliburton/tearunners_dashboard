@@ -32,7 +32,7 @@ export default {
   mounted() {
     this.getShipments();
     this.loading = false;
-    // this.updateShippingData();
+    this.updateShippingData();
   },
   methods: {
     async getProducts() {
@@ -65,7 +65,7 @@ export default {
       $this.loading = true;
       let options = {
         headers: {
-          Authorization: "Basic dGVhX3J1bm5lcnM6TjBxeHFMcHRqRnFNMTdrMg=="
+          Authorization: "API KEY"
         }
       };
       let apiUrl = "http://api.cratejoy.com/v1/shipments/" + url;
