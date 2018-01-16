@@ -1,8 +1,8 @@
 <template>
 
   <div class="upcoming-shipments">
-    <!-- {{this.countUpcomingShipments(shipments)}} -->
-      <div v-for="month in productCount" :key="month.id">
+    {{this.countUpcomingShipments(shipments)}}
+      <div v-for="month in productCount" :key="month.prod_id">
         <div class="title">{{month.title}}</div>
           <span class="flex-grid">
             <template v-for="product in month" v-if="product.count">
@@ -27,26 +27,21 @@ export default {
     countUpcomingShipments(shipments) {
       if (shipments.length) {
         shipments.map(item => {
-          if (item.fulfillments) {
-            item.fulfillments.map(order => {
-              let name = order.instance.product.name
-                .split(" - ")[0]
-                .replace("Tea Runners", "");
-              let shipmentDate = new Date(item["adjusted_ordered_at"]);
-              let shipmentMonth = shipmentDate.getMonth();
-              if (!this.productCount[shipmentMonth][name]) {
-                this.productCount[shipmentMonth][name] = {
-                  name,
-                  count: 1
-                };
-              } else {
-                this.productCount[shipmentMonth][name].count++;
-              }
-            });
+          if (item.name) {
+            let name = item.name.split(" - ")[0].replace("Tea Runners", "");
+            let shipmentDate = new Date(item["adjusted_fulfillment_date"]);
+            let shipmentMonth = shipmentDate.getMonth();
+            if (!this.productCount[shipmentMonth][name]) {
+              this.productCount[shipmentMonth][name] = {
+                name,
+                count: 1
+              };
+            } else {
+              this.productCount[shipmentMonth][name].count++;
+            }
           }
         });
       }
-      console.log(this.productCount);
     }
   },
   data() {

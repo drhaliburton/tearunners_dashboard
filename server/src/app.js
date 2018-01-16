@@ -18,7 +18,6 @@ var Shipments = require("../models/shipment");
 app.get('/products', (req, res) => {
 	Products.find({}, function (error, products) {
 		if (error) { console.error(error); }
-		console.log(products);
 		res.send({
 			products: products
 		})
@@ -28,31 +27,47 @@ app.get('/products', (req, res) => {
 app.get('/shipments', (req, res) => {
 	Shipments.find({}, function (error, shipments) {
 		if (error) { console.error(error); }
-		console.log(shipments);
 		res.send({
 			shipments: shipments
 		})
 	}).sort({ _id: -1 })
 })
 
-app.post('/add_post', (req, res) => {
-	var db = req.db;
-	var title = req.body.title;
-	var description = req.body.description;
-	var new_post = new Post({
-		title: title,
-		description: description
-	})
+app.post('/shipments', (req, res) => {
+	const db = req.db;
+	let id = req.body.id;
 
-	new_post.save(function (error) {
-		if (error) {
-			console.log(error)
+	Shipments.find({ "prod_id": id }, function (error, results) {
+		if (error) { console.error(error); }
+
+		console.log(results, req.body.id);
+
+		if (results[0] == null) {
+			if (req.body.fulfillments) {
+				req.body.fulfillments.map(item => {
+					console.log(item)
+					let adjusted_fulfillment_date = item.adjusted_fulfillment_date;
+					let name = item.instance.product.name;
+					let prod_id = item.id;
+					let data = new Shipments({
+						adjusted_fulfillment_date,
+						name,
+						prod_id
+					})
+					data.save(function (error) {
+						if (error) {
+							console.log(error)
+							return;
+						}
+						res.send({
+							success: true
+						})
+					})
+				})
+			}
 		}
-		res.send({
-			success: true
-		})
 	})
-})
+});
 
 app.put('/posts/:id', (req, res) => {
 	var db = req.db;
