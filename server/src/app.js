@@ -9,10 +9,10 @@ app.use(bodyParser.json())
 app.use(cors())
 
 const mongodb_conn_module = require('./mongodbConnModule');
-var db = mongodb_conn_module.connect();
+let db = mongodb_conn_module.connect();
 
-var Products = require("../models/product");
-var Shipments = require("../models/shipment");
+let Products = require("../models/product");
+let Shipments = require("../models/shipment");
 
 
 app.get('/products', (req, res) => {
@@ -45,7 +45,6 @@ app.post('/shipments', (req, res) => {
 		if (results[0] == null) {
 			if (req.body.fulfillments) {
 				req.body.fulfillments.map(item => {
-					console.log(item)
 					let adjusted_fulfillment_date = item.adjusted_fulfillment_date;
 					let name = item.instance.product.name;
 					let prod_id = item.id;
@@ -64,48 +63,13 @@ app.post('/shipments', (req, res) => {
 						})
 					})
 				})
+			} else {
+				console.log(req.body);
 			}
 		}
 	})
 });
 
-app.put('/posts/:id', (req, res) => {
-	var db = req.db;
-	Post.findById(req.params.id, 'title description', function (error, post) {
-		if (error) { console.error(error); }
 
-		post.title = req.body.title
-		post.description = req.body.description
-		post.save(function (error) {
-			if (error) {
-				console.log(error)
-			}
-			res.send({
-				success: true
-			})
-		})
-	})
-})
-
-app.delete('/posts/:id', (req, res) => {
-	var db = req.db;
-	Post.remove({
-		_id: req.params.id
-	}, function (err, post) {
-		if (err)
-			res.send(err)
-		res.send({
-			success: true
-		})
-	})
-})
-
-app.get('/post/:id', (req, res) => {
-	var db = req.db;
-	Post.findById(req.params.id, 'title description', function (error, post) {
-		if (error) { console.error(error); }
-		res.send(post)
-	})
-})
 
 app.listen(process.env.PORT || 8081)

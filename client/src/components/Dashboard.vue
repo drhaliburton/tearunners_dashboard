@@ -1,5 +1,8 @@
 <template>
 <span>
+
+  <Loading :loading='loading'></Loading>
+  <button @click="loading = !loading" class="sync">{{loading ? this.count + ' Loaded...' : ' Sync Shipments'}}</button>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
 </span>
 </template>
@@ -7,22 +10,28 @@
 <script>
 import Api from "@/services/ApiServices";
 import UpcomingShipments from "./UpcomingShipments";
+import Loading from "./Loading";
+
 import moment from "moment";
 
 export default {
   name: "dashboard",
   components: {
-    UpcomingShipments
+    UpcomingShipments,
+    Loading
   },
   data() {
     return {
       products: [],
       shipments: {},
-      next: ""
+      next: "",
+      loading: true,
+      count: 0
     };
   },
   mounted() {
     this.getShipments();
+    this.loading = false;
     // this.updateShippingData();
   },
   methods: {
@@ -36,12 +45,14 @@ export default {
     },
     async postShipments(data) {
       const response = await Api.updateShippingData(data);
+      if (response.data.success) {
+        this.count++;
+      }
     },
     updateShippingData(next) {
       let currentDate = moment().format("YYYY-MM-DD");
-      let url = `?fulfillments.adjusted_fulfillment_date__gt=${currentDate}T00:00:00Z`;
+      let url = `?fulfillments.adjusted_fulfillment_date__gt=${currentDate}T00:00:00Z&status=unshipped`;
       if (next) {
-        console.log("Next", next);
         this.fetchShippingDetails(next);
       } else {
         if (next !== false) {
@@ -50,9 +61,8 @@ export default {
       }
     },
     fetchShippingDetails(url) {
-      console.log("Url", url);
-
       let $this = this;
+      $this.loading = true;
       let options = {
         headers: {
           Authorization: "Basic dGVhX3J1bm5lcnM6TjBxeHFMcHRqRnFNMTdrMg=="
@@ -71,6 +81,7 @@ export default {
             $this.next = data.next;
           } else {
             $this.next = false;
+            $this.loading = false;
           }
           return data;
         })
@@ -87,5 +98,13 @@ export default {
 };
 </script>
 <style type="text/css">
-
+.sync {
+  margin: 1rem auto 5rem;
+  font-size: 0.2rem;
+  width: 160px;
+}
+.sync:hover {
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
 </style>
