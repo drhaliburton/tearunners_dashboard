@@ -6,11 +6,10 @@ export default {
   },
   fetchShipments() {
     return Api().get('shipments')
+  },
+  updateShippingData(params) {
+    return Api().post('shipments', params)
   }
-
-  // addPost(params) {
-  //   return Api().post('add_post', params)
-  // },
 
   // updatePost(params) {
   //   return Api().put('posts/' + params.id, params)

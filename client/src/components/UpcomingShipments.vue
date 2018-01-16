@@ -1,8 +1,8 @@
 <template>
 
   <div class="upcoming-shipments">
-    <!-- {{this.countUpcomingShipments(shipments)}} -->
-      <div v-for="month in productCount" :key="month.id">
+    {{this.countUpcomingShipments(shipments)}}
+      <div v-for="month in productCount" :key="month.prod_id">
         <div class="title">{{month.title}}</div>
           <span class="flex-grid">
             <template v-for="product in month" v-if="product.count">
@@ -27,12 +27,17 @@ export default {
     countUpcomingShipments(shipments) {
       if (shipments.length) {
         shipments.map(item => {
-          if (item.fulfillments) {
-            item.fulfillments.map(order => {
-              let name = order.instance.product.name
-                .split(" - ")[0]
-                .replace("Tea Runners", "");
-              let shipmentDate = new Date(item["adjusted_ordered_at"]);
+          if (item.name) {
+            let name = item.name.includes("Christmas")
+              ? item.name.replace(item.name, "Christmas")
+              : item.name
+                  .split(" - ")[0]
+                  .replace("Tea Runners ", "")
+                  .replace(" Box ", "")
+                  .replace(" All ", "");
+
+            if (!name.includes("Test")) {
+              let shipmentDate = new Date(item["adjusted_fulfillment_date"]);
               let shipmentMonth = shipmentDate.getMonth();
               if (!this.productCount[shipmentMonth][name]) {
                 this.productCount[shipmentMonth][name] = {
@@ -42,11 +47,10 @@ export default {
               } else {
                 this.productCount[shipmentMonth][name].count++;
               }
-            });
+            }
           }
         });
       }
-      console.log(this.productCount);
     }
   },
   data() {
@@ -95,9 +99,10 @@ export default {
 </script>
 <style type="text/scss">
 .upcoming-shipments {
-  padding: 2rem;
+  padding: 0 2rem 4rem;
   margin: auto;
-  width: 60%;
+  width: 80%;
+  max-width: 800px;
   border: 1px solid #e1e1e1;
   border-radius: 10px;
 }
@@ -126,7 +131,7 @@ tr {
   font-weight: 500;
   margin-top: 2rem;
   padding: 1rem;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 .col {
   flex: 1;
