@@ -20,8 +20,8 @@ module.exports = merge(baseWebpackConfig, {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': config.dev.env,
-      'API_SHIPMENTS_URL': JSON.stringify('http://api.cratejoy.com/v1/shipments/'),
-      'API_AUTH': JSON.stringify('Basic dGVhX3J1bm5lcnM6TjBxeHFMcHRqRnFNMTdrMg==')
+      'API_SHIPMENTS_URL': config.dev.env.API_SHIPMENTS_URL,
+      'API_AUTH': config.dev.env.API_AUTH
     }),
     // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
     new webpack.HotModuleReplacementPlugin(),

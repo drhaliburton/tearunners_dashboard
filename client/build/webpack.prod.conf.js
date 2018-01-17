@@ -29,9 +29,7 @@ var webpackConfig = merge(baseWebpackConfig, {
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': env,
-      'API_SHIPMENTS_URL': JSON.stringify('http://api.cratejoy.com/v1/shipments/'),
-      'API_AUTH': JSON.stringify('Basic dGVhX3J1bm5lcnM6TjBxeHFMcHRqRnFNMTdrMg==')
+      'process.env': env
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
