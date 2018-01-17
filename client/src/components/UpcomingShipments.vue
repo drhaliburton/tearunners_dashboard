@@ -117,11 +117,13 @@ td {
   width: 33%;
   border-bottom: none;
 }
+
 tr {
   border-collapse: collapse;
 }
 .flex-grid {
   display: flex;
+  flex-wrap: wrap;
   min-height: 5rem;
 }
 .title {
@@ -134,6 +136,12 @@ tr {
   font-size: 1.2rem;
 }
 .col {
-  flex: 1;
+  flex: 2;
+}
+
+@media only screen and (max-width: 600px) {
+  .col {
+    margin: 0 4rem;
+  }
 }
 </style>
