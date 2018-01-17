@@ -59,8 +59,8 @@ export default {
     updateShippingData(next) {
       let currentDate = moment().format("YYYY-MM-DD");
       let lastSyncDate = moment(this.getLastSyncDate()).format("YYYY-MM-DD");
-      let params = `?created_at__ge=${lastSyncDate}T00:00:00Z&fulfillments.adjusted_fulfillment_date__gt=${currentDate}T00:00:00Z&status=unshipped`;
-      if (next && !this.loading) {
+      let params = `?fulfillments.adjusted_fulfillment_date__ge=${currentDate}T00:00:00Z`;
+      if (next) {
         this.fetchShippingDetails(next);
       } else {
         if (next !== false) {
@@ -83,6 +83,9 @@ export default {
         })
         .then(function(data) {
           data.results.map(item => {
+            if (item.fulfillments[0].instance.product.name.includes("Herbal")) {
+              console.log(item);
+            }
             $this.postShipments(item);
           });
           if (data.next) {
@@ -95,7 +98,7 @@ export default {
         })
         .then(function(data) {
           if ($this.next) {
-            $this.updateShippingData(data.next);
+            $this.updateShippingData($this.next);
           }
         })
         .catch(err => {

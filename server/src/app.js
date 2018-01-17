@@ -39,11 +39,12 @@ app.post('/shipments', (req, res) => {
 	const db = req.db;
 	let id = req.body.id;
 
+
 	Shipments.findById(req.body.id, function (error, results) {
 		if (error) { console.error(error); }
-		if (!results) {
-			if (req.body.fulfillments) {
-				req.body.fulfillments.map(item => {
+		if ((req.body.status === 'unshipped' && !results)) {
+			req.body.fulfillments.map(item => {
+				if (req.body.status === 'unshipped') {
 					let adjusted_fulfillment_date = item.adjusted_fulfillment_date;
 					let name = item.instance.product.name;
 					let _id = req.body.id;
@@ -59,16 +60,16 @@ app.post('/shipments', (req, res) => {
 							console.error(error)
 							return;
 						}
-						console.log("Shipment Added: ", req.body.id)
+						console.log("Shipment Added: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
 
 						res.send({
 							success: true
 						})
 					})
-				})
-			}
+				}
+			})
 		} else {
-			if (req.body.status === 'shipped') {
+			if (req.body.status !== 'unshipped') {
 				Shipments.remove({
 					_id: req.body.id
 				}, function (err, post) {
@@ -77,18 +78,21 @@ app.post('/shipments', (req, res) => {
 						console.error(error)
 
 					}
-					console.log("Shipment Deleted: ", req.body.id)
+					console.log("Shipment Deleted: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
 					res.send({
-						success: true
+						deleted: true
 					})
 				})
+			} else {
+				console.log("Shipment Already Exists: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
+				res.send({
+					skipped: true
+				})
 			}
-			console.log("Shipment Already Exists: ", req.body.id, req.body.status)
-			res.send({
-				skipped: true
-			})
 		}
 	})
+
+
 });
 
 app.listen(process.env.PORT || 8081)
