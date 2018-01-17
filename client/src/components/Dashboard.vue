@@ -2,10 +2,14 @@
 <span>
 
   <Loading :loading='loading'></Loading>
-  <button @click="updateShippingData()" class="sync">{{(loading && this.count === 0) ? "Loading" : loading ? this.count + ' Loaded' : 'Sync Shipments'}}
-    <span class="saving" v-if="(loading && this.count === 0)"><span>.</span><span>.</span><span>.</span></span>
-
-  </button>
+    <button @click="updateShippingData()" class="sync">{{loading ? 'Loading' : 'Sync Shipments'}}
+      <span class="saving" v-if="(loading)"><span>.</span><span>.</span><span>.</span></span>
+    </button>
+    <div>
+      <span>{{this.success}} loaded | </span>
+      <span> {{this.skipped}} skipped | </span>
+      <span>{{this.deleted}} deleted</span>
+    </div>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
 </span>
 </template>
@@ -29,7 +33,9 @@ export default {
       shipments: {},
       next: "",
       loading: false,
-      count: 0
+      success: 0,
+      deleted: 0,
+      skipped: 0
     };
   },
   mounted() {
@@ -47,9 +53,11 @@ export default {
     },
     async postShipments(data) {
       const response = await Api.updateShippingData(data);
-      if (response.data.success) {
-        this.count++;
-      }
+      response.data.success
+        ? this.success++
+        : response.data.skipped
+          ? this.skipped++
+          : response.data.deleted ? this.deleted++ : false;
     },
     getLastSyncDate() {
       return this.shipments.reduce((a, b) => {
@@ -58,8 +66,8 @@ export default {
     },
     updateShippingData(next) {
       let currentDate = moment().format("YYYY-MM-DD");
-      let lastSyncDate = moment(this.getLastSyncDate()).format("YYYY-MM-DD");
-      let params = `?fulfillments.adjusted_fulfillment_date__ge=${currentDate}T00:00:00Z`;
+      let params =
+        "?fulfillments.adjusted_fulfillment_date__gt=2018-1-1T00:00:00Z";
       if (next) {
         this.fetchShippingDetails(next);
       } else {
@@ -68,7 +76,7 @@ export default {
         }
       }
     },
-    fetchShippingDetails(params) {
+    fetchShippingDetails(params = "") {
       let $this = this;
       $this.loading = true;
       let options = {

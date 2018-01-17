@@ -55,40 +55,40 @@ export default {
   data() {
     return {
       productCount: {
-        0: {
+        11: {
           title: "January"
         },
-        1: {
+        0: {
           title: "February"
         },
-        2: {
+        1: {
           title: "March"
         },
-        3: {
+        2: {
           title: "April"
         },
-        4: {
+        3: {
           title: "May"
         },
-        5: {
+        4: {
           title: "June"
         },
-        6: {
+        5: {
           title: "July"
         },
-        7: {
+        6: {
           title: "August"
         },
-        8: {
+        7: {
           title: "September"
         },
-        9: {
+        8: {
           title: "October"
         },
-        10: {
+        9: {
           title: "November"
         },
-        11: {
+        10: {
           title: "December"
         }
       }
