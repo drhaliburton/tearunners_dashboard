@@ -59,16 +59,16 @@ export default {
     updateShippingData(next) {
       let currentDate = moment().format("YYYY-MM-DD");
       let lastSyncDate = moment(this.getLastSyncDate()).format("YYYY-MM-DD");
-      let url = `?created_at__ge=${lastSyncDate}T00:00:00Z&fulfillments.adjusted_fulfillment_date__gt=${currentDate}T00:00:00Z&status=unshipped`;
+      let params = `?created_at__ge=${lastSyncDate}T00:00:00Z&fulfillments.adjusted_fulfillment_date__gt=${currentDate}T00:00:00Z&status=unshipped`;
       if (next && !this.loading) {
         this.fetchShippingDetails(next);
       } else {
         if (next !== false) {
-          this.fetchShippingDetails(url);
+          this.fetchShippingDetails(params);
         }
       }
     },
-    fetchShippingDetails(url) {
+    fetchShippingDetails(params) {
       let $this = this;
       $this.loading = true;
       let options = {
@@ -76,7 +76,7 @@ export default {
           Authorization: API_AUTH
         }
       };
-      let apiUrl = API_SHIPMENTS_URL + url;
+      let apiUrl = API_SHIPMENTS_URL + params;
       fetch(apiUrl, options)
         .then(function(response) {
           return response.json();
