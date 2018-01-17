@@ -31,6 +31,7 @@ export default {
 }
 .cup-container {
   margin: -1em auto;
+  font-size: 0.2rem;
 }
 .steam-container {
   position: relative;

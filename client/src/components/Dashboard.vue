@@ -2,7 +2,10 @@
 <span>
 
   <Loading :loading='loading'></Loading>
-  <button @click="loading = !loading" class="sync">{{loading ? this.count + ' Loaded...' : ' Sync Shipments'}}</button>
+  <button @click="updateShippingData()" class="sync">{{(loading && this.count === 0) ? "Loading" : loading ? this.count + ' Loaded' : 'Sync Shipments'}}
+    <span class="saving" v-if="(loading && this.count === 0)"><span>.</span><span>.</span><span>.</span></span>
+
+  </button>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
 </span>
 </template>
@@ -25,14 +28,13 @@ export default {
       products: [],
       shipments: {},
       next: "",
-      loading: true,
+      loading: false,
       count: 0
     };
   },
   mounted() {
     this.getShipments();
     this.loading = false;
-    this.updateShippingData();
   },
   methods: {
     async getProducts() {
@@ -49,10 +51,16 @@ export default {
         this.count++;
       }
     },
+    getLastSyncDate() {
+      return this.shipments.reduce((a, b) => {
+        return a.created_at > b.created_at ? a.created_at : b.created_at;
+      });
+    },
     updateShippingData(next) {
       let currentDate = moment().format("YYYY-MM-DD");
-      let url = `?fulfillments.adjusted_fulfillment_date__gt=${currentDate}T00:00:00Z&status=unshipped`;
-      if (next) {
+      let lastSyncDate = moment(this.getLastSyncDate()).format("YYYY-MM-DD");
+      let url = `?created_at__ge=${lastSyncDate}T00:00:00Z&fulfillments.adjusted_fulfillment_date__gt=${currentDate}T00:00:00Z&status=unshipped`;
+      if (next && !this.loading) {
         this.fetchShippingDetails(next);
       } else {
         if (next !== false) {
@@ -65,10 +73,10 @@ export default {
       $this.loading = true;
       let options = {
         headers: {
-          Authorization: "API KEY"
+          Authorization: API_AUTH
         }
       };
-      let apiUrl = "http://api.cratejoy.com/v1/shipments/" + url;
+      let apiUrl = API_SHIPMENTS_URL + url;
       fetch(apiUrl, options)
         .then(function(response) {
           return response.json();
@@ -99,12 +107,43 @@ export default {
 </script>
 <style type="text/css">
 .sync {
-  margin: 1rem auto 5rem;
+  margin: 1rem auto 3rem;
   font-size: 0.2rem;
   width: 160px;
+}
+button {
+  transition: all 0.25s ease-in-out;
+  -moz-transition: all 0.25s ease-in-out;
+  -webkit-transition: all 0.25s ease-in-out;
 }
 .sync:hover {
   background-color: #f9f9f9;
   cursor: pointer;
+}
+@keyframes blink {
+  0% {
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.saving span {
+  animation-name: blink;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+.saving span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.saving span:nth-child(3) {
+  animation-delay: 0.4s;
 }
 </style>

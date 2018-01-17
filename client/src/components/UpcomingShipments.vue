@@ -1,5 +1,4 @@
 <template>
-
   <div class="upcoming-shipments">
     {{this.countUpcomingShipments(shipments)}}
       <div v-for="month in productCount" :key="month.prod_id">
@@ -29,7 +28,7 @@ export default {
         shipments.map(item => {
           if (item.name) {
             let name = item.name.includes("Christmas")
-              ? item.name.replace(item.name, "Christmas")
+              ? item.name.replace(item.name, "Christmas Box")
               : item.name
                   .split(" - ")[0]
                   .replace("Tea Runners ", "")
@@ -101,6 +100,7 @@ export default {
 .upcoming-shipments {
   padding: 0 2rem 4rem;
   margin: auto;
+  margin-bottom: 8rem;
   width: 80%;
   max-width: 800px;
   border: 1px solid #e1e1e1;

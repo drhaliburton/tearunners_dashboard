@@ -2,6 +2,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
+const moment = require('moment');
+
 
 const app = express()
 app.use(morgan('combined'))
@@ -37,39 +39,56 @@ app.post('/shipments', (req, res) => {
 	const db = req.db;
 	let id = req.body.id;
 
-	Shipments.find({ "prod_id": id }, function (error, results) {
+	Shipments.findById(req.body.id, function (error, results) {
 		if (error) { console.error(error); }
-
-		console.log(results, req.body.id);
-
-		if (results[0] == null) {
+		if (!results) {
 			if (req.body.fulfillments) {
 				req.body.fulfillments.map(item => {
 					let adjusted_fulfillment_date = item.adjusted_fulfillment_date;
 					let name = item.instance.product.name;
-					let prod_id = item.id;
+					let _id = req.body.id;
+					let created_at = moment().format()
 					let data = new Shipments({
 						adjusted_fulfillment_date,
 						name,
-						prod_id
+						created_at,
+						_id
 					})
 					data.save(function (error) {
 						if (error) {
-							console.log(error)
+							console.error(error)
 							return;
 						}
+						console.log("Shipment Added: ", req.body.id)
+
 						res.send({
 							success: true
 						})
 					})
 				})
-			} else {
-				console.log(req.body);
 			}
+		} else {
+			if (req.body.status === 'shipped') {
+				Shipments.remove({
+					_id: req.body.id
+				}, function (err, post) {
+					if (err) {
+						res.send(err)
+						console.error(error)
+
+					}
+					console.log("Shipment Deleted: ", req.body.id)
+					res.send({
+						success: true
+					})
+				})
+			}
+			console.log("Shipment Already Exists: ", req.body.id, req.body.status)
+			res.send({
+				skipped: true
+			})
 		}
 	})
 });
-
-
 
 app.listen(process.env.PORT || 8081)

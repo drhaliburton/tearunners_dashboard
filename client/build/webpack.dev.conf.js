@@ -19,7 +19,9 @@ module.exports = merge(baseWebpackConfig, {
   devtool: '#cheap-module-eval-source-map',
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': config.dev.env
+      'process.env': config.dev.env,
+      'API_SHIPMENTS_URL': JSON.stringify('http://api.cratejoy.com/v1/shipments/'),
+      'API_AUTH': JSON.stringify('Basic dGVhX3J1bm5lcnM6TjBxeHFMcHRqRnFNMTdrMg==')
     }),
     // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
     new webpack.HotModuleReplacementPlugin(),
