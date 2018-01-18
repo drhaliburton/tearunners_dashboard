@@ -4,14 +4,16 @@
       <div v-for="month in productCount" :key="month.prod_id">
         <div class="title">{{month.title}}</div>
           <span class="flex-grid">
-            <template v-for="product in month" v-if="product.count">
-              <div :key="product.name" class="col">
+            <span v-for="shipments in month" v-if="shipments['shipments']" :key="shipments.name">
+              <span v-for="product in shipment" v-if="product.count" :key="product.name">
+              <div class="col">
                 <td>
-                  <span class="product-name">{{product.name}}</span>
-                  <br>{{product.count}}
+                  <span class="product-name">{{product}}</span>
+                  <br>
                 </td>
               </div>
-            </template>
+              </span>
+            </span>
           </span>
       </div>
   </div>
@@ -24,6 +26,7 @@ export default {
   mounted() {},
   methods: {
     countUpcomingShipments(shipments) {
+      let $this = this;
       if (shipments.length) {
         shipments.map(item => {
           if (item.name) {
@@ -38,58 +41,107 @@ export default {
             if (!name.includes("Test")) {
               let shipmentDate = new Date(item["adjusted_fulfillment_date"]);
               let shipmentMonth = shipmentDate.getMonth();
-              if (!this.productCount[shipmentMonth][name]) {
-                this.productCount[shipmentMonth][name] = {
+              if (!$this.productCount[shipmentMonth]["shipments"][name]) {
+                $this.productCount[shipmentMonth]["shipments"][name] = {
                   name,
                   count: 1
                 };
               } else {
-                this.productCount[shipmentMonth][name].count++;
+                $this.productCount[shipmentMonth]["shipments"][name].count++;
               }
             }
+            $this.countUpcomingRenewals(item);
+            console.log($this.productCount);
           }
         });
       }
+    },
+    countUpcomingRenewals(item) {
+      let $this = this;
+      if (item.autorenew) {
+        let name = item.name.includes("Christmas")
+          ? item.name.replace(item.name, "Christmas Box")
+          : item.name
+              .split(" - ")[0]
+              .replace("Tea Runners ", "")
+              .replace(" Box ", "")
+              .replace(" All ", "");
+        let shipmentDate = new Date(item["end_date"]);
+        let shipmentMonth = shipmentDate.getMonth();
+        if (!$this.productCount[shipmentMonth]["renewals"][name]) {
+          $this.productCount[shipmentMonth]["renewals"][name] = {
+            name,
+            count: 1
+          };
+        } else {
+          $this.productCount[shipmentMonth]["renewals"][name].count++;
+        }
+      }
     }
   },
+
   data() {
     return {
       productCount: {
         11: {
-          title: "January"
+          title: "January",
+          shipments: {},
+          renewals: {}
         },
         0: {
-          title: "February"
+          title: "February",
+          shipments: {},
+          renewals: {}
         },
         1: {
-          title: "March"
+          title: "March",
+          shipments: {},
+          renewals: {}
         },
         2: {
-          title: "April"
+          title: "April",
+          shipments: {},
+          renewals: {}
         },
         3: {
-          title: "May"
+          title: "May",
+          shipments: {},
+          renewals: {}
         },
         4: {
-          title: "June"
+          title: "June",
+          shipments: {},
+          renewals: {}
         },
         5: {
-          title: "July"
+          title: "July",
+          shipments: {},
+          renewals: {}
         },
         6: {
-          title: "August"
+          title: "August",
+          shipments: {},
+          renewals: {}
         },
         7: {
-          title: "September"
+          title: "September",
+          shipments: {},
+          renewals: {}
         },
         8: {
-          title: "October"
+          title: "October",
+          shipments: {},
+          renewals: {}
         },
         9: {
-          title: "November"
+          title: "November",
+          shipments: {},
+          renewals: {}
         },
         10: {
-          title: "December"
+          title: "December",
+          shipments: {},
+          renewals: {}
         }
       }
     };

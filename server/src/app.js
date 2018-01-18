@@ -48,11 +48,18 @@ app.post('/shipments', (req, res) => {
 					let adjusted_fulfillment_date = item.adjusted_fulfillment_date;
 					let name = item.instance.product.name;
 					let _id = req.body.id;
-					let created_at = moment().format()
+					let created_at = moment().format();
+					let end_date = item.order.subscriptions[0] ? item.order.subscriptions[0].end_date : null;
+					let autorenew = item.order.subscriptions[0] ? item.order.subscriptions[0].autorenew : null;
+
+					console.log(req.body.id, end_date, autorenew);
+
 					let data = new Shipments({
 						adjusted_fulfillment_date,
 						name,
 						created_at,
+						end_date,
+						autorenew,
 						_id
 					})
 					data.save(function (error) {
@@ -61,7 +68,6 @@ app.post('/shipments', (req, res) => {
 							return;
 						}
 						console.log("Shipment Added: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
-
 						res.send({
 							success: true
 						})
@@ -76,7 +82,6 @@ app.post('/shipments', (req, res) => {
 					if (err) {
 						res.send(err)
 						console.error(error)
-
 					}
 					console.log("Shipment Deleted: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
 					res.send({

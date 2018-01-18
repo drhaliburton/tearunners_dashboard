@@ -91,9 +91,6 @@ export default {
         })
         .then(function(data) {
           data.results.map(item => {
-            if (item.fulfillments[0].instance.product.name.includes("Herbal")) {
-              console.log(item);
-            }
             $this.postShipments(item);
           });
           if (data.next) {
