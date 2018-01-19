@@ -6,7 +6,7 @@
       <span class="saving" v-if="(loading)"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <div class="product-count">
-      <template v-if="loading">
+      <template v-if="loading || loaded">
         <span>{{this.success}} loaded │ </span>
         <span> {{this.skipped}} skipped │ </span>
         <span>{{this.deleted}} deleted</span>
@@ -35,6 +35,7 @@ export default {
       shipments: {},
       next: "",
       loading: false,
+      loaded: false,
       success: 0,
       deleted: 0,
       skipped: 0
@@ -99,6 +100,7 @@ export default {
             $this.next = data.next;
           } else {
             $this.next = false;
+            $this.loaded = true;
             $this.loading = false;
           }
           return data;

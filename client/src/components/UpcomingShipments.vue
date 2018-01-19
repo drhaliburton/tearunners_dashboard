@@ -39,6 +39,7 @@ export default {
   methods: {
     countUpcomingShipments(shipments) {
       let $this = this;
+
       if (shipments.length) {
         shipments.map(item => {
           if (item.name) {
@@ -47,12 +48,12 @@ export default {
               : item.name
                   .split(" - ")[0]
                   .replace("Tea Runners ", "")
-                  .replace(" Box ", "")
-                  .replace(" All ", "");
+                  .replace("All ", "");
 
             if (!name.includes("Test")) {
               let shipmentDate = new Date(item["adjusted_fulfillment_date"]);
               let shipmentMonth = shipmentDate.getMonth();
+
               if (!$this.productCount[shipmentMonth]["shipments"][name]) {
                 $this.productCount[shipmentMonth]["shipments"][name] = {
                   name,
@@ -63,21 +64,20 @@ export default {
               }
             }
             $this.countUpcomingRenewals(item);
-            console.log($this.productCount);
           }
         });
       }
     },
     countUpcomingRenewals(item) {
       let $this = this;
-      if (item.autorenew) {
+      if (item.autorenew && !item.name.includes("Test")) {
         let name = item.name.includes("Christmas")
           ? item.name.replace(item.name, "Christmas Box")
           : item.name
               .split(" - ")[0]
               .replace("Tea Runners ", "")
               .replace(" Box ", "")
-              .replace(" All ", "");
+              .replace("All ", "");
         let shipmentDate = new Date(item["end_date"]);
         let shipmentMonth = shipmentDate.getMonth();
         if (!$this.productCount[shipmentMonth]["renewals"][name]) {
@@ -88,7 +88,28 @@ export default {
         } else {
           $this.productCount[shipmentMonth]["renewals"][name].count++;
         }
+        this.orderKeys($this.productCount[shipmentMonth]["renewals"]);
+        this.orderKeys($this.productCount[shipmentMonth]["shipments"]);
       }
+    },
+    orderKeys(obj, expected) {
+      var keys = Object.keys(obj).sort(function keyOrder(k2, k1) {
+        if (k1 < k2) return -1;
+        else if (k1 > k2) return +1;
+        else return 0;
+      });
+
+      var i,
+        after = {};
+      for (i = 0; i < keys.length; i++) {
+        after[keys[i]] = obj[keys[i]];
+        delete obj[keys[i]];
+      }
+
+      for (i = 0; i < keys.length; i++) {
+        obj[keys[i]] = after[keys[i]];
+      }
+      return obj;
     }
   },
 
