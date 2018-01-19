@@ -2,7 +2,7 @@
 <span>
 
   <Loading :loading='loading'></Loading>
-    <button @click="updateShippingData()" class="sync">{{loading ? 'Loading' : 'Sync Shipments'}}
+    <button @click="loaded ? refresh() : updateShippingData()" class="sync">{{loaded ? 'Refresh Page' : loading ? 'Loading' : 'Sync Shipments'}}
       <span class="saving" v-if="(loading)"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <div class="product-count">
@@ -61,6 +61,9 @@ export default {
         : response.data.skipped
           ? this.skipped++
           : response.data.deleted ? this.deleted++ : false;
+    },
+    refresh() {
+      window.location.reload();
     },
     getLastSyncDate() {
       return this.shipments.reduce((a, b) => {
