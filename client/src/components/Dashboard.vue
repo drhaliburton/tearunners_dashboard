@@ -2,7 +2,7 @@
 <span>
 
   <Loading :loading='loading'></Loading>
-    <button @click="loaded ? refresh() : updateShippingData()" class="sync">{{loaded ? 'Refresh Page' : loading ? 'Loading' : 'Sync Shipments'}}
+    <button @click="loaded ? helpers.refresh() : updateShippingData()" class="sync">{{loaded ? 'Refresh Page' : loading ? 'Loading' : 'Sync Shipments'}}
       <span class="saving" v-if="(loading)"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <div class="product-count">
@@ -20,6 +20,7 @@
 import Api from "@/services/ApiServices";
 import UpcomingShipments from "./UpcomingShipments";
 import Loading from "./Loading";
+import helpers from "@/services/helpers";
 
 import moment from "moment";
 
@@ -61,14 +62,6 @@ export default {
         : response.data.skipped
           ? this.skipped++
           : response.data.deleted ? this.deleted++ : false;
-    },
-    refresh() {
-      window.location.reload();
-    },
-    getLastSyncDate() {
-      return this.shipments.reduce((a, b) => {
-        return a.created_at > b.created_at ? a.created_at : b.created_at;
-      });
     },
     updateShippingData(next) {
       let currentDate = moment().format("YYYY-MM-DD");
