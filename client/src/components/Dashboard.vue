@@ -5,10 +5,12 @@
     <button @click="updateShippingData()" class="sync">{{loading ? 'Loading' : 'Sync Shipments'}}
       <span class="saving" v-if="(loading)"><span>.</span><span>.</span><span>.</span></span>
     </button>
-    <div>
-      <span>{{this.success}} loaded | </span>
-      <span> {{this.skipped}} skipped | </span>
-      <span>{{this.deleted}} deleted</span>
+    <div class="product-count">
+      <template v-if="loading">
+        <span>{{this.success}} loaded │ </span>
+        <span> {{this.skipped}} skipped │ </span>
+        <span>{{this.deleted}} deleted</span>
+      </template>
     </div>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
 </span>
@@ -115,9 +117,14 @@ export default {
 </script>
 <style type="text/css">
 .sync {
-  margin: 1rem auto 3rem;
+  margin: 1rem auto 0;
   font-size: 0.2rem;
   width: 160px;
+}
+.product-count {
+  font-size: 0.9rem;
+  height: 50px;
+  margin: 1rem auto;
 }
 button {
   transition: all 0.25s ease-in-out;

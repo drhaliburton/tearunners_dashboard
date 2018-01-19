@@ -3,18 +3,30 @@
     {{this.countUpcomingShipments(shipments)}}
       <div v-for="month in productCount" :key="month.prod_id">
         <div class="title">{{month.title}}</div>
+          <tr><div class="row-title">Subscriptions</div></tr>
           <span class="flex-grid">
-            <span v-for="shipments in month" v-if="shipments['shipments']" :key="shipments.name">
-              <span v-for="product in shipment" v-if="product.count" :key="product.name">
+            <span v-for="shipment in month.shipments" v-if="shipment" :key="shipment.name">
               <div class="col">
                 <td>
-                  <span class="product-name">{{product}}</span>
+                  <span class="product-name">{{shipment.name}}</span>
                   <br>
+                  {{shipment.count}}
                 </td>
               </div>
-              </span>
             </span>
           </span>
+        <tr><div class="row-title">Renewals</div></tr>
+        <span class="flex-grid">
+          <span v-for="renewal in month.renewals" v-if="renewal" :key="renewal.name">
+            <div class="col">
+              <td>
+                <span class="product-name">{{renewal.name}}</span>
+                <br>
+                {{renewal.count}}
+              </td>
+            </div>
+          </span>
+        </span>
       </div>
   </div>
 </template>
@@ -166,12 +178,15 @@ export default {
 }
 td {
   text-align: center;
-  width: 33%;
+  width: 200px;
   border-bottom: none;
 }
 
 tr {
   border-collapse: collapse;
+}
+.row-title {
+  margin: 2rem;
 }
 .flex-grid {
   display: flex;
@@ -191,9 +206,19 @@ tr {
   flex: 2;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 800px) {
   .col {
-    margin: 0 4rem;
+    margin: 0 1.3rem;
+    width: 100px;
+  }
+  .flex-grid {
+    justify-content: center;
+  }
+  .upcoming-shipments {
+    padding: 0 1rem 1rem;
+  }
+  .title {
+    margin-top: 1rem;
   }
 }
 </style>
