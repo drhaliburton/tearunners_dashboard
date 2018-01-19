@@ -1,8 +1,10 @@
 <template>
   <div class="upcoming-shipments">
     {{this.countUpcomingShipments(shipments)}}
+
       <div v-for="month in productCount" :key="month.prod_id">
         <div class="title">{{month.title}}</div>
+
           <tr><div class="row-title">Subscriptions</div></tr>
           <span class="flex-grid">
             <span v-for="shipment in month.shipments" v-if="shipment" :key="shipment.name">
@@ -15,6 +17,7 @@
               </div>
             </span>
           </span>
+
         <tr><div class="row-title">Renewals</div></tr>
         <span class="flex-grid">
           <span v-for="renewal in month.renewals" v-if="renewal" :key="renewal.name">
@@ -27,6 +30,7 @@
             </div>
           </span>
         </span>
+
         <div class="row-title total">Totals</div>
         <span class="flex-grid">
           <span v-for="item in month.count" v-if="item.count" :key="item.count">
@@ -102,7 +106,7 @@ export default {
           $this.productCount[shipmentMonth]["renewals"][name].count++;
         }
         this.countProductTotals(shipmentMonth, name);
-
+        this.orderKeys($this.productCount[shipmentMonth]["count"]);
         this.orderKeys($this.productCount[shipmentMonth]["renewals"]);
         this.orderKeys($this.productCount[shipmentMonth]["shipments"]);
       }
