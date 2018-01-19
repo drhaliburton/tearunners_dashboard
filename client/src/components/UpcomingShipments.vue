@@ -70,7 +70,6 @@ export default {
         });
       }
     },
-
     countUpcomingRenewals(item) {
       let $this = this;
       if (item.autorenew && !item.name.includes("Test")) {
@@ -185,7 +184,8 @@ export default {
   }
 };
 </script>
-<style type="text/scss">
+
+<style type="text/css">
 .upcoming-shipments {
   padding: 0 2rem 4rem;
   margin: auto;

@@ -1,13 +1,11 @@
 <template>
-
-          <div class="col">
-            <td>
-              <span class="product-name">{{item.name}}</span>
-              <br>
-              {{item.count}}
-            </td>
-          </div>
-
+  <div class="col">
+    <td>
+      <span class="product-name">{{item.name}}</span>
+      <br>
+      {{item.count}}
+    </td>
+  </div>
 </template>
 
 <script>
@@ -18,6 +16,7 @@ export default {
   methods: {}
 };
 </script>
+
 <style type="text/scss">
 .flex-grid {
   display: flex;

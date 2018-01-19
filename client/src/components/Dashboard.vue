@@ -90,9 +90,8 @@ export default {
           return response.json();
         })
         .then(function(data) {
-          data.results.map(item => {
-            $this.postShipments(item);
-          });
+          data.results.map($this.postShipments);
+
           if (data.next) {
             $this.next = data.next;
           } else {
@@ -107,9 +106,7 @@ export default {
             $this.updateShippingData($this.next);
           }
         })
-        .catch(err => {
-          console.error(err);
-        });
+        .catch(console.error);
     }
   }
 };
