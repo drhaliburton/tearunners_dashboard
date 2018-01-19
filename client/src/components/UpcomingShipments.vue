@@ -27,6 +27,18 @@
             </div>
           </span>
         </span>
+        <div class="row-title total">Totals</div>
+        <span class="flex-grid">
+          <span v-for="item in month.count" v-if="item.count" :key="item.count">
+            <div class="col">
+              <td>
+                <span class="product-name">{{item.name}}</span>
+                <br>
+                {{item.count}}
+              </td>
+            </div>
+          </span>
+        </span>
       </div>
   </div>
 </template>
@@ -62,6 +74,7 @@ export default {
               } else {
                 $this.productCount[shipmentMonth]["shipments"][name].count++;
               }
+              this.countProductTotals(shipmentMonth, name);
             }
             $this.countUpcomingRenewals(item);
           }
@@ -88,14 +101,26 @@ export default {
         } else {
           $this.productCount[shipmentMonth]["renewals"][name].count++;
         }
+        this.countProductTotals(shipmentMonth, name);
+
         this.orderKeys($this.productCount[shipmentMonth]["renewals"]);
         this.orderKeys($this.productCount[shipmentMonth]["shipments"]);
       }
     },
+    countProductTotals(shipmentMonth, name) {
+      if (!this.productCount[shipmentMonth]["count"][name]) {
+        this.productCount[shipmentMonth].count[name] = {
+          name,
+          count: 1
+        };
+      } else {
+        this.productCount[shipmentMonth]["count"][name].count++;
+      }
+    },
     orderKeys(obj, expected) {
-      var keys = Object.keys(obj).sort(function keyOrder(k2, k1) {
-        if (k1 < k2) return -1;
-        else if (k1 > k2) return +1;
+      var keys = Object.keys(obj).sort(function keyOrder(k1, k2) {
+        if (k1 > k2) return -1;
+        else if (k1 < k2) return +1;
         else return 0;
       });
 
@@ -118,61 +143,73 @@ export default {
       productCount: {
         11: {
           title: "January",
+          count: {},
           shipments: {},
           renewals: {}
         },
         0: {
           title: "February",
+          count: {},
           shipments: {},
           renewals: {}
         },
         1: {
           title: "March",
+          count: {},
           shipments: {},
           renewals: {}
         },
         2: {
           title: "April",
+          count: {},
           shipments: {},
           renewals: {}
         },
         3: {
           title: "May",
+          count: {},
           shipments: {},
           renewals: {}
         },
         4: {
           title: "June",
+          count: {},
           shipments: {},
           renewals: {}
         },
         5: {
           title: "July",
+          count: {},
           shipments: {},
           renewals: {}
         },
         6: {
           title: "August",
+          count: {},
           shipments: {},
           renewals: {}
         },
         7: {
           title: "September",
+          count: {},
           shipments: {},
           renewals: {}
         },
         8: {
           title: "October",
+          count: {},
           shipments: {},
           renewals: {}
         },
         9: {
           title: "November",
+          count: {},
           shipments: {},
           renewals: {}
         },
         10: {
           title: "December",
+          count: {},
           shipments: {},
           renewals: {}
         }
@@ -188,7 +225,7 @@ export default {
   margin-bottom: 8rem;
   width: 80%;
   max-width: 800px;
-  border: 1px solid #e1e1e1;
+  border: 1px solid #bbbbbb;
   border-radius: 10px;
 }
 .item {
@@ -196,6 +233,18 @@ export default {
 }
 .product-name {
   font-weight: 600;
+}
+.total {
+  background-image: linear-gradient(
+    to right,
+    #bbbbbb 33%,
+    rgba(255, 255, 255, 0) 0%
+  );
+  background-position: bottom;
+  background-size: 4px 1px;
+  background-repeat: repeat-x;
+  margin-bottom: 1rem;
+  text-align: left;
 }
 td {
   text-align: center;
@@ -207,7 +256,7 @@ tr {
   border-collapse: collapse;
 }
 .row-title {
-  margin: 2rem;
+  margin: 1.8rem;
 }
 .flex-grid {
   display: flex;
@@ -217,11 +266,11 @@ tr {
 .title {
   display: block;
   text-align: left;
-  border-bottom: 1px solid #e1e1e1;
+  border-bottom: 1px solid #bbbbbb;
   font-weight: 500;
   margin-top: 2rem;
   padding: 1rem;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
 }
 .col {
   flex: 2;

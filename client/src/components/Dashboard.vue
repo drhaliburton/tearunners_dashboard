@@ -7,7 +7,7 @@
     </button>
     <div class="product-count">
       <template v-if="loading || loaded">
-        <span>{{this.success}} loaded │ </span>
+        <span>{{this.success}} added │ </span>
         <span> {{this.skipped}} skipped │ </span>
         <span>{{this.deleted}} deleted</span>
       </template>
@@ -70,7 +70,7 @@ export default {
     updateShippingData(next) {
       let currentDate = moment().format("YYYY-MM-DD");
       let params =
-        "?fulfillments.adjusted_fulfillment_date__gt=2018-1-1T00:00:00Z";
+        "?fulfillments.adjusted_fulfillment_date__ge=2017-12-15T00:00:00Z";
       if (next) {
         this.fetchShippingDetails(next);
       } else {
@@ -84,7 +84,8 @@ export default {
       $this.loading = true;
       let options = {
         headers: {
-          Authorization: API_AUTH
+          Authorization: API_AUTH,
+          "Content-Type": "application/json"
         }
       };
       let apiUrl = API_SHIPMENTS_URL + params;

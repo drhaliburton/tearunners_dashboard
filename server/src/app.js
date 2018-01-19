@@ -42,15 +42,15 @@ app.post('/shipments', (req, res) => {
 
 	Shipments.findById(req.body.id, function (error, results) {
 		if (error) { console.error(error); }
-		if ((req.body.status === 'unshipped' && !results)) {
+		if (!results) {
 			req.body.fulfillments.map(item => {
 				if (req.body.status === 'unshipped') {
 					let adjusted_fulfillment_date = item.adjusted_fulfillment_date;
 					let name = item.instance.product.name;
 					let _id = req.body.id;
 					let created_at = moment().format();
-					let end_date = item.order.subscriptions[0] ? item.order.subscriptions[0].end_date : null;
-					let autorenew = item.order.subscriptions[0] ? item.order.subscriptions[0].autorenew : null;
+					let end_date = item.order.subscriptions[0].end_date ? item.order.subscriptions[0].end_date : null;
+					let autorenew = item.order.subscriptions[0].autorenew ? item.order.subscriptions[0].autorenew : null;
 
 					console.log(req.body.id, end_date, autorenew);
 
@@ -71,6 +71,11 @@ app.post('/shipments', (req, res) => {
 						res.send({
 							success: true
 						})
+					})
+				} else {
+					console.log("Shipment Already Shipped: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
+					res.send({
+						skipped: true
 					})
 				}
 			})

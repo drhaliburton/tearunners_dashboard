@@ -65,7 +65,7 @@ export default {
   box-shadow: rgb(38, 38, 38) 0px 0.5em 0px 0.61803em inset;
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;
-  margin: 6.0884em 0.45rem;
+  margin: 6.0884em 0.25rem;
 }
 
 .cup .filled {
