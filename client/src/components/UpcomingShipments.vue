@@ -68,8 +68,8 @@ export default {
 
             if (!name.includes("Test")) {
               let shipmentDate = new Date(item["adjusted_fulfillment_date"]);
-              let shipmentMonth = shipmentDate.getMonth();
-
+              let month = shipmentDate.getMonth();
+              let shipmentMonth = month === 11 ? 0 : month + 1;
               if (!$this.productCount[shipmentMonth]["shipments"][name]) {
                 $this.productCount[shipmentMonth]["shipments"][name] = {
                   name,
@@ -96,7 +96,8 @@ export default {
               .replace(" Box ", "")
               .replace("All ", "");
         let shipmentDate = new Date(item["end_date"]);
-        let shipmentMonth = shipmentDate.getMonth();
+        let month = shipmentDate.getMonth();
+        let shipmentMonth = month === 11 ? 0 : month + 1;
         if (!$this.productCount[shipmentMonth]["renewals"][name]) {
           $this.productCount[shipmentMonth]["renewals"][name] = {
             name,
@@ -145,73 +146,73 @@ export default {
   data() {
     return {
       productCount: {
-        11: {
+        0: {
           title: "January",
           count: {},
           shipments: {},
           renewals: {}
         },
-        0: {
+        1: {
           title: "February",
           count: {},
           shipments: {},
           renewals: {}
         },
-        1: {
+        2: {
           title: "March",
           count: {},
           shipments: {},
           renewals: {}
         },
-        2: {
+        3: {
           title: "April",
           count: {},
           shipments: {},
           renewals: {}
         },
-        3: {
+        4: {
           title: "May",
           count: {},
           shipments: {},
           renewals: {}
         },
-        4: {
+        5: {
           title: "June",
           count: {},
           shipments: {},
           renewals: {}
         },
-        5: {
+        6: {
           title: "July",
           count: {},
           shipments: {},
           renewals: {}
         },
-        6: {
+        7: {
           title: "August",
           count: {},
           shipments: {},
           renewals: {}
         },
-        7: {
+        8: {
           title: "September",
           count: {},
           shipments: {},
           renewals: {}
         },
-        8: {
+        9: {
           title: "October",
           count: {},
           shipments: {},
           renewals: {}
         },
-        9: {
+        10: {
           title: "November",
           count: {},
           shipments: {},
           renewals: {}
         },
-        10: {
+        11: {
           title: "December",
           count: {},
           shipments: {},
