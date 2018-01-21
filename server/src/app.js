@@ -1,14 +1,16 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const morgan = require('morgan')
 const moment = require('moment');
-
+const helmet = require('helmet')
+const pino = require('pino')()
 
 const app = express()
-app.use(morgan('combined'))
+
 app.use(bodyParser.json())
 app.use(cors())
+app.use(helmet())
+
 
 const mongodb_conn_module = require('./mongodbConnModule');
 let db = mongodb_conn_module.connect();
@@ -16,88 +18,83 @@ let db = mongodb_conn_module.connect();
 let Products = require("../models/product");
 let Shipments = require("../models/shipment");
 
+let shipment = db.collection('Shipments');
 
-app.get('/products', (req, res) => {
-	Products.find({}, function (error, products) {
-		if (error) { console.error(error); }
-		res.send({
-			products: products
-		})
-	}).sort({ _id: -1 })
-})
+
+// app.get('/products', (req, res) => {
+// 	Products.find({}, function (error, products) {
+// 		if (error) { pino.error(error); }
+// 		res.send({
+// 			products: products
+// 		})
+// 	}).sort({ _id: -1 })
+// })
 
 app.get('/shipments', (req, res) => {
-	Shipments.find({}, function (error, shipments) {
-		if (error) { console.error(error); }
-		res.send({
-			shipments: shipments
-		})
-	}).sort({ _id: -1 })
+	shipment.find({}).toArray(function (error, shipments) {
+		if (error) {
+			throw error;
+			pino.error(error);
+		}
+		res.send(shipments);
+	});
 })
 
 app.post('/shipments', (req, res) => {
-	const db = req.db;
-	let id = req.body.id;
+	let created_at = moment().format();
+
+	const item = req.body;
+	let fulfillments = item.fulfillments[0];
+	let subscriptions = fulfillments.order.subscriptions[0];
+	let _id = item.id;
+	let adjusted_fulfillment_date = fulfillments.adjusted_fulfillment_date;
+	let name = fulfillments.instance.product.name;
+	let end_date = subscriptions ? subscriptions.end_date : null;
+	let autorenew = subscriptions ? subscriptions.autorenew : null;
 
 
-	Shipments.findById(req.body.id, function (error, results) {
-		if (error) { console.error(error); }
-		if (!results) {
-			req.body.fulfillments.map(item => {
-				if (req.body.status === 'unshipped') {
-					let adjusted_fulfillment_date = item.adjusted_fulfillment_date;
-					let name = item.instance.product.name;
-					let _id = req.body.id;
-					let created_at = moment().format();
-					let end_date = item.order.subscriptions[0].end_date ? item.order.subscriptions[0].end_date : null;
-					let autorenew = item.order.subscriptions[0].autorenew ? item.order.subscriptions[0].autorenew : null;
+	shipment.count({ _id }, function (error, results) {
+		if (error) {
+			throw err
+			pino.error(error);
+		}
 
-					console.log(req.body.id, end_date, autorenew);
-
-					let data = new Shipments({
-						adjusted_fulfillment_date,
-						name,
-						created_at,
-						end_date,
-						autorenew,
-						_id
-					})
-					data.save(function (error) {
-						if (error) {
-							console.error(error)
-							return;
-						}
-						console.log("Shipment Added: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
-						res.send({
-							success: true
-						})
-					})
-				} else {
-					console.log("Shipment Already Shipped: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
+		if (results == 0) {
+			if (item.status === 'unshipped') {
+				let item = {
+					adjusted_fulfillment_date,
+					name,
+					created_at,
+					end_date,
+					autorenew,
+					_id
+				};
+				shipment.insertOne(item, function (err, r) {
+					if (err) { pino.error(err); }
+					pino.info(r);
 					res.send({
-						skipped: true
-					})
-				}
-			})
-		} else {
-			if (req.body.status !== 'unshipped') {
-				Shipments.remove({
-					_id: req.body.id
-				}, function (err, post) {
-					if (err) {
-						res.send(err)
-						console.error(error)
-					}
-					console.log("Shipment Deleted: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
-					res.send({
-						deleted: true
-					})
+						success: 1,
+						type: 'success'
+					});
+					pino.info("Shipments Added")
 				})
 			} else {
-				console.log("Shipment Already Exists: ", 'id: ' + req.body.id, 'status: ' + req.body.status)
+				pino.info("Order Already Shipped");
 				res.send({
-					skipped: true
+					skipped: 1,
+					type: 'skipped'
+				});
+			}
+		} else {
+			if (item.status !== 'unshipped') {
+				shipment.deleteOne({ _id }, function (error, results) {
+					if (error) { pino.error(error); }
+					pino.info("Shipment Deleted")
+					res.send({ deleted: 1, type: 'deleted' });
 				})
+			} else {
+				pino.info("Shipment Already Exists")
+				res.send({ skipped: 1, type: 'skipped' });
 			}
 		}
 	})

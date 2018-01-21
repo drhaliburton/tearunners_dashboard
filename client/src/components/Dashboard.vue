@@ -2,14 +2,18 @@
 <span>
 
   <Loading :loading='loading'></Loading>
-    <button @click="loaded ? helpers.refresh() : updateShippingData()" class="sync">{{loaded ? 'Refresh Page' : loading ? 'Loading' : 'Sync Shipments'}}
-      <span class="saving" v-if="(loading)"><span>.</span><span>.</span><span>.</span></span>
+    <button @click="loaded || error ? refresh() : updateShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loading ? 'Loading' : 'Sync Shipments'}}
+      <span class="saving" v-if="loading"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <div class="product-count">
       <template v-if="loading || loaded">
         <span>{{this.success}} added │ </span>
         <span> {{this.skipped}} skipped │ </span>
         <span>{{this.deleted}} deleted</span>
+      </template>
+      <template v-if="error">
+        <span class="error">Error: please refresh and try again.</span>
+
       </template>
     </div>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
@@ -37,6 +41,7 @@ export default {
       next: "",
       loading: false,
       loaded: false,
+      error: false,
       success: 0,
       deleted: 0,
       skipped: 0
@@ -48,23 +53,27 @@ export default {
   },
   methods: {
     async getProducts() {
-      const response = await Api.fetchProducts();
+      const response = await Api.fetchProducts().catch(err => {
+        this.error = true;
+        this.loading = false;
+      });
       this.products = response.data.products;
     },
     async getShipments() {
-      const response = await Api.fetchShipments();
-      this.shipments = response.data.shipments;
+      const response = await Api.fetchShipments().catch(err => {
+        this.error = true;
+        this.loading = false;
+      });
+      this.shipments = response.data;
     },
     async postShipments(data) {
-      const response = await Api.updateShippingData(data);
-      response.data.success
-        ? this.success++
-        : response.data.skipped
-          ? this.skipped++
-          : response.data.deleted ? this.deleted++ : false;
+      const response = await Api.updateShippingData(data).catch(err => {
+        this.error = true;
+        this.loading = false;
+      });
+      this[response.data.type]++;
     },
     updateShippingData(next) {
-      let currentDate = moment().format("YYYY-MM-DD");
       let params =
         "?fulfillments.adjusted_fulfillment_date__ge=2017-12-15T00:00:00Z";
       if (next) {
@@ -90,8 +99,9 @@ export default {
           return response.json();
         })
         .then(function(data) {
-          data.results.map($this.postShipments);
-
+          data.results.map(item => {
+            $this.postShipments(item);
+          });
           if (data.next) {
             $this.next = data.next;
           } else {
@@ -99,14 +109,19 @@ export default {
             $this.loaded = true;
             $this.loading = false;
           }
-          return data;
         })
-        .then(function(data) {
+        .then(() => {
           if ($this.next) {
             $this.updateShippingData($this.next);
           }
         })
-        .catch(console.error);
+        .catch(err => {
+          $this.error = true;
+          $this.loading = false;
+        });
+    },
+    refresh() {
+      helpers.refresh();
     }
   }
 };
@@ -156,5 +171,8 @@ button {
 
 .saving span:nth-child(3) {
   animation-delay: 0.4s;
+}
+.error {
+  color: darkred;
 }
 </style>
