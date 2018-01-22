@@ -4,7 +4,6 @@ const express = require('express')
 const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const moment = require('moment');
 const helmet = require('helmet')
 const pino = require('pino')()
 
@@ -47,12 +46,13 @@ MongoClient.connect(url, function (err, client) {
 				throw err
 				pino.error(error);
 			}
-
+			const item = req.body;
+			let _id = item.id;
 			if (results == 0) {
 				if (item.status === 'unshipped') {
-					let item = helpers.buildShipment(item);
+					let itemObj = helpers.buildShipment(item);
 
-					helpers.postShipment(shipment, item);
+					helpers.postShipment(shipment, itemObj);
 					res.send({
 						success: 1,
 						type: 'success'

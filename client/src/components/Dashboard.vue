@@ -75,7 +75,7 @@ export default {
     },
     updateShippingData(next) {
       let params =
-        "?fulfillments.adjusted_fulfillment_date__ge=2017-12-15T00:00:00Z";
+        "?fulfillments.adjusted_fulfillment_date__ge=2017-07-15T00:00:00Z";
       if (next) {
         this.fetchShippingDetails(next);
       } else {
@@ -96,7 +96,13 @@ export default {
       let apiUrl = API_SHIPMENTS_URL + params;
       fetch(apiUrl, options)
         .then(function(response) {
-          return response.json();
+          if (response.status == 502) {
+            setTimeout(function() {
+              $this.fetchShippingDetails($this.next);
+            }, 10000);
+          } else {
+            return response.json();
+          }
         })
         .then(function(data) {
           data.results.map(item => {
