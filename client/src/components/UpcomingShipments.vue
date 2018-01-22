@@ -194,33 +194,25 @@ tr {
   display: flex;
   flex-wrap: wrap;
   min-height: 5rem;
+  justify-content: center;
 }
 .title {
   display: block;
   text-align: left;
   border-bottom: 1px solid #bbbbbb;
   font-weight: 500;
-  margin-top: 2rem;
-  padding: 1rem;
+  margin-top: 1rem;
+  padding: 1.5rem;
   font-size: 1.4rem;
 }
 .col {
   flex: 2;
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 600px) {
   .col {
-    margin: 0 1.3rem;
-    width: 100px;
-  }
-  .flex-grid {
-    justify-content: center;
-  }
-  .upcoming-shipments {
-    padding: 0 1rem 1rem;
-  }
-  .title {
-    margin-top: 1rem;
+    margin: 0 0.8rem;
+    width: 125px;
   }
 }
 </style>
