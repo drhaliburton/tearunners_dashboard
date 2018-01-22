@@ -3,25 +3,27 @@
     {{this.countUpcomingShipments(shipments)}}
 
     <div v-for="month in productCount" :key="month.prod_id">
+          {{fillEmptyCells(month.month)}}
+
       <div class="title">{{month.title}}</div>
 
         <tr><div class="row-title">Subscriptions</div></tr>
         <span class="flex-grid">
-          <span v-for="item in month.shipments" :key="item.count">
+          <span v-for="item in month.shipments" :key="item.id">
               <DataCell :item="item"></DataCell>
             </span>
         </span>
 
       <tr><div class="row-title">Renewals</div></tr>
       <span class="flex-grid">
-        <span v-for="item in month.renewals" :key="item.count">
+        <span v-for="item in month.renewals" :key="item.id">
             <DataCell :item="item"></DataCell>
           </span>
       </span>
 
       <div class="row-title total">Totals</div>
       <span class="flex-grid">
-        <span v-for="item in month.count" :key="item.count">
+        <span v-for="item in month.count" :key="item.id">
             <DataCell :item="item"></DataCell>
           </span>
       </span>
@@ -32,6 +34,8 @@
 
 <script>
 import helpers from "@/services/helpers";
+import data from "@/services/data";
+
 import DataCell from "./partials/DataCell";
 
 export default {
@@ -42,6 +46,31 @@ export default {
   },
   mounted() {},
   methods: {
+    fillEmptyCells(month) {
+      for (var product in this.products) {
+        if (!this.productCount[month]["shipments"][product]) {
+          this.productCount[month]["shipments"][product] = {
+            name: product,
+            count: 0
+          };
+        }
+        if (!this.productCount[month]["renewals"][product]) {
+          this.productCount[month]["renewals"][product] = {
+            name: product,
+            count: 0
+          };
+        }
+        if (!this.productCount[month]["count"][product]) {
+          this.productCount[month]["count"][product] = {
+            name: product,
+            count: 0
+          };
+        }
+      }
+      helpers.orderKeys(this.productCount[month]["count"]);
+      helpers.orderKeys(this.productCount[month]["renewals"]);
+      helpers.orderKeys(this.productCount[month]["shipments"]);
+    },
     countUpcomingShipments(shipments) {
       let $this = this;
       if (shipments.length) {
@@ -55,10 +84,19 @@ export default {
               let shipmentMonth = helpers.getShipmentMonth(
                 item["adjusted_fulfillment_date"]
               );
+
+              if (!$this.products[name]) {
+                $this.products[name] = {
+                  name: name,
+                  count: 0
+                };
+              }
+
               if (!$this.productCount[shipmentMonth]["shipments"][name]) {
                 $this.productCount[shipmentMonth]["shipments"][name] = {
                   name,
-                  count: 1
+                  count: 1,
+                  id: item.id
                 };
               } else {
                 $this.productCount[shipmentMonth]["shipments"][name].count++;
@@ -81,22 +119,21 @@ export default {
         if (!$this.productCount[shipmentMonth]["renewals"][name]) {
           $this.productCount[shipmentMonth]["renewals"][name] = {
             name,
-            count: 1
+            count: 1,
+            id: item.id
           };
         } else {
           $this.productCount[shipmentMonth]["renewals"][name].count++;
         }
         this.countProductTotals(shipmentMonth, name);
-        helpers.orderKeys($this.productCount[shipmentMonth]["count"]);
-        helpers.orderKeys($this.productCount[shipmentMonth]["renewals"]);
-        helpers.orderKeys($this.productCount[shipmentMonth]["shipments"]);
       }
     },
     countProductTotals(shipmentMonth, name) {
       if (!this.productCount[shipmentMonth]["count"][name]) {
         this.productCount[shipmentMonth].count[name] = {
           name,
-          count: 1
+          count: 1,
+          id: shipmentMonth + name
         };
       } else {
         this.productCount[shipmentMonth]["count"][name].count++;
@@ -106,80 +143,8 @@ export default {
 
   data() {
     return {
-      productCount: {
-        0: {
-          title: "January",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        1: {
-          title: "February",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        2: {
-          title: "March",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        3: {
-          title: "April",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        4: {
-          title: "May",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        5: {
-          title: "June",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        6: {
-          title: "July",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        7: {
-          title: "August",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        8: {
-          title: "September",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        9: {
-          title: "October",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        10: {
-          title: "November",
-          count: {},
-          shipments: {},
-          renewals: {}
-        },
-        11: {
-          title: "December",
-          count: {},
-          shipments: {},
-          renewals: {}
-        }
-      }
+      products: {},
+      productCount: data.productCount
     };
   }
 };

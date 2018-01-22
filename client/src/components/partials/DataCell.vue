@@ -16,7 +16,6 @@ export default {
   methods: {}
 };
 </script>
-
 <style type="text/scss">
 .flex-grid {
   display: flex;
