@@ -97,6 +97,9 @@ export default {
       fetch(apiUrl, options)
         .then(function(response) {
           if (response.status == 502) {
+            setTimeout(function() {
+              $this.fetchShippingDetails($this.next);
+            }, 10000);
             $this.fetchShippingDetails($this.next);
           } else {
             return response.json();
