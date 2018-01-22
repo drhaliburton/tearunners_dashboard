@@ -2,7 +2,9 @@ var chalk = require('chalk')
 var semver = require('semver')
 var packageConfig = require('../package.json')
 var shell = require('shelljs')
-function exec (cmd) {
+var pino = require('pino')()
+
+function exec(cmd) {
   return require('child_process').execSync(cmd).toString().trim()
 }
 
@@ -35,14 +37,14 @@ module.exports = function () {
   }
 
   if (warnings.length) {
-    console.log('')
-    console.log(chalk.yellow('To use this template, you must update following to modules:'))
-    console.log()
+    pino.info('')
+    pino.info(chalk.yellow('To use this template, you must update following to modules:'))
+    pino.info()
     for (var i = 0; i < warnings.length; i++) {
       var warning = warnings[i]
-      console.log('  ' + warning)
+      pino.info('  ' + warning)
     }
-    console.log()
+    pino.info()
     process.exit(1)
   }
 }
