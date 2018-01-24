@@ -7,10 +7,11 @@
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
-    "build": "node build/build.js"
+    "build": "node build/build.js && cp -a ./dist/. ../server/public && rm -rf ./dist"
   },
   "dependencies": {
     "axios": "^0.16.2",
+    "moment": "^2.20.1",
     "pino": "^4.10.3",
     "vue": "^2.4.2",
     "vue-router": "^2.7.0",
