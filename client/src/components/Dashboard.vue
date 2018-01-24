@@ -91,7 +91,7 @@ export default {
         headers: {
           Authorization: API_AUTH,
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          Origin: BASE_URL
         }
       };
       let apiUrl = API_SHIPMENTS_URL + params;

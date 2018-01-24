@@ -22,7 +22,7 @@ module.exports = merge(baseWebpackConfig, {
       'process.env': config.dev.env,
       'API_SHIPMENTS_URL': config.dev.env.API_SHIPMENTS_URL,
       'API_AUTH': config.dev.env.API_AUTH,
-      'BASE_URL': "http://localhost:8081"
+      'BASE_URL': config.dev.env.BASE_URL
     }),
     // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
     new webpack.HotModuleReplacementPlugin(),
