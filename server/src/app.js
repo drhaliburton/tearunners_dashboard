@@ -9,11 +9,17 @@ const pino = require('pino')();
 
 const app = express();
 
+app.use(cors());
+app.use(bodyParser.json());
+app.use(helmet());
 app.use(express.static('public'));
 
-app.use(bodyParser.json());
-app.use(cors());
-app.use(helmet());
+
+app.use(function (req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
 
 const url = process.env.DB_URL;
 const dbName = process.env.DB_NAME;
