@@ -1,0 +1,23 @@
+{
+  "name": "tearunners",
+  "version": "1.0.0",
+  "description": "\"Tearunners Dashboard\"",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "install": "cd server && npm install && cd ../client && npm install",
+    "postinstall": "cd client && npm run build",
+    "start": "cd server && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drhaliburton/tearunners_dashboard.git"
+  },
+  "author": "Rebecca Haliburton @drhaliburton",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/drhaliburton/tearunners_dashboard/issues"
+  },
+  "homepage": "https://github.com/drhaliburton/tearunners_dashboard#readme"
+}
