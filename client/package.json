@@ -16,9 +16,7 @@
     "vue": "^2.4.2",
     "vue-router": "^2.7.0",
     "vue-sweetalert2": "^1.0.7",
-    "semver": "^5.3.0"
-  },
-  "devDependencies": {
+    "semver": "^5.3.0",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^7.1.1",
@@ -45,7 +43,6 @@
     "sinon-chai": "^2.8.0",
     "inject-loader": "^3.0.0",
     "babel-plugin-istanbul": "^4.1.1",
-    "semver": "^5.3.0",
     "shelljs": "^0.7.6",
     "opn": "^5.1.0",
     "optimize-css-assets-webpack-plugin": "^2.0.0",
