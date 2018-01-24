@@ -91,7 +91,7 @@ export default {
         headers: {
           Authorization: API_AUTH,
           "Content-Type": "application/json",
-          Origin: BASE_URL
+          Origin: process.env.BASE_URL
         }
       };
       let apiUrl = API_SHIPMENTS_URL + params;
