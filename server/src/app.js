@@ -28,7 +28,6 @@ MongoClient.connect(url, function (err, client) {
 
 	let shipment = db.collection('Shipments');
 	let subscription = db.collection('Subscriptions');
-
 	let helpers = require("./helpers");
 
 	app.get('/shipments', (req, res) => {
@@ -42,7 +41,7 @@ MongoClient.connect(url, function (err, client) {
 	})
 
 	app.get('/api/shipments', (req, res) => {
-		let params = req.query.next ? req.query.next : '';
+		let params = req.query.next ? req.query.next : '?fulfillments.adjusted_fulfillment_date__ge=2017-11-15T00:00:00Z';
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
 			headers: {
@@ -53,24 +52,40 @@ MongoClient.connect(url, function (err, client) {
 		let next = false;
 		request.get(options, function (error, response, body) {
 			let data = JSON.parse(body);
-			for (var item in data.results) {
-				let body = JSON.stringify(data.results[item])
-				let options = {
-					url: 'http://localhost:8081/shipments',
-					body
-				}
-				request.post(options, function (error, response, body) {
+			data.results.map(item => {
+				let _id = item.id;
+				shipment.count({ _id }, function (error, results) {
 					if (error) {
-						throw error;
+						pino.error(error);
+					}
+					let _id = item.id;
+					if (results == 0) {
+						if (item.status === 'unshipped') {
+							let itemObj = helpers.buildShipment(item);
+							helpers.postShipment(shipment, itemObj);
+							res.send({
+								success: 1,
+								type: 'success'
+							});
+						} else {
+							pino.info('Skipped: ', item.status);
+						}
+					} else {
+						if (item.status !== 'unshipped') {
+							helpers.deleteShipment(shipment, item);
+						} else {
+							helpers.updateShipment(shipment, item);
+						}
 					}
 				})
-			}
+			})
 			if (data.next) {
+				pino.info(data.next);
 				let options = {
-					url: 'http://localhost:8081/api/shipments',
+					url: process.env.BASE_URL + 'api/shipments',
 					qs: {
 						next: data.next,
-					},
+					}
 				}
 				request.get(options, function (error, response, body) {
 					if (error) {
@@ -93,7 +108,6 @@ MongoClient.connect(url, function (err, client) {
 			headers: {
 				'User-Agent': 'request',
 				Authorization: process.env.API_AUTH,
-				"Content-Type": "application/json",
 			},
 		}
 		let next = false;
@@ -102,7 +116,7 @@ MongoClient.connect(url, function (err, client) {
 			for (var item in data.results) {
 				let body = JSON.stringify(data.results[item])
 				let options = {
-					url: 'http://localhost:8081/subscriptions',
+					url: process.env.BASE_URL + 'subscriptions/',
 					body
 				}
 				request.post(options, function (error, response, body) {
@@ -113,16 +127,21 @@ MongoClient.connect(url, function (err, client) {
 			}
 			if (data.next) {
 				let options = {
-					url: 'http://localhost:8081/api/subscriptions',
+					url: process.env.BASE_URL + 'api/subscriptions',
 					qs: {
 						next: data.next,
 					},
-				}
-				request.get(options, function (error, response, body) {
-					if (error) {
-						pino.error(error);
+					headers: {
+						'accept-encoding': 'gzip, deflate'
 					}
-				})
+				}
+				setTimeout(function () {
+					request.get(options, function (error, response, body) {
+						if (error) {
+							pino.error(error);
+						}
+					})
+				}, 100)
 			} else {
 				res.send({
 					success: 1,
@@ -132,57 +151,9 @@ MongoClient.connect(url, function (err, client) {
 		})
 	})
 
+
 	app.post('/shipments', (req, res) => {
 
-		var body = '';
-		req.on('data', function (data) { body += data; });
-		req.on('end', function (data) {
-			req.body = JSON.parse(body);
-
-			const item = req.body;
-			let _id = item.id;
-
-			console.log(item, _id);
-
-			shipment.count({ _id }, function (error, results) {
-				if (error) {
-					pino.error(error);
-				}
-				const item = req.body;
-				let _id = item.id;
-				if (results == 0) {
-					if (item.status === 'unshipped') {
-						let itemObj = helpers.buildShipment(item);
-
-						helpers.postShipment(shipment, itemObj);
-						res.send({
-							success: 1,
-							type: 'success'
-						});
-					} else {
-						pino.info("Order Already Shipped");
-						res.send({
-							skipped: 1,
-							type: 'skipped'
-						});
-					}
-				} else {
-					if (item.status !== 'unshipped') {
-						helpers.deleteShipment(shipment, item);
-						res.send({
-							deleted: 1,
-							type: 'deleted'
-						});
-					} else {
-						pino.info("Shipment Already Exists")
-						res.send({
-							skipped: 1,
-							type: 'skipped'
-						});
-					}
-				}
-			})
-		});
 	});
 
 
@@ -197,8 +168,6 @@ MongoClient.connect(url, function (err, client) {
 			const item = req.body;
 			let _id = item.id;
 
-			console.log(item, _id);
-
 			subscription.count({ _id }, function (error, results) {
 				if (error) {
 					pino.error(error);
@@ -208,7 +177,6 @@ MongoClient.connect(url, function (err, client) {
 				if (results == 0) {
 					if (item.status === 'active') {
 						let itemObj = helpers.buildSubscription(item);
-
 						helpers.postSubscription(shipment, itemObj);
 						res.send({
 							success: 1,
@@ -240,6 +208,7 @@ MongoClient.connect(url, function (err, client) {
 		});
 	});
 
-	app.listen(process.env.PORT || 8081)
+	const server = app.listen(process.env.PORT || 8081)
+	server.timeout = 240000;
 
 });
