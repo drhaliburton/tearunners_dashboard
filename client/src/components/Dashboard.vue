@@ -75,7 +75,7 @@ export default {
     },
     updateShippingData(next) {
       let params =
-        "?fulfillments.adjusted_fulfillment_date__ge=2018-1-15T00:00:00Z";
+        "?fulfillments.adjusted_fulfillment_date__ge=2017-7-15T00:00:00Z";
       if (next) {
         this.fetchShippingDetails(next);
       } else {

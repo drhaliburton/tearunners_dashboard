@@ -103,7 +103,7 @@ export default {
               }
               this.countProductTotals(shipmentMonth, name);
             }
-            $this.countUpcomingRenewals(item);
+            // $this.countUpcomingRenewals(item);
           }
         });
       }
