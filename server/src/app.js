@@ -6,6 +6,8 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const helmet = require('helmet')
 const pino = require('pino')()
+const fetch = require('fetch');
+
 
 const app = express()
 app.use(express.static('public'));
@@ -38,49 +40,75 @@ MongoClient.connect(url, function (err, client) {
 		});
 	})
 
+	app.get('/api/shipments', (req, res) => {
+
+		let options = {
+			headers: {
+				Authorization: process.env.API_AUTH,
+				"Content-Type": "application/json",
+			}
+		};
+
+		let apiUrl = 'http://api.cratejoy/v1/shipments/';
+		fetch(apiUrl, options)
+			.then(function (response) {
+				// if (response.status == 502) {
+				// 	setTimeout(function () {
+				// 		$this.fetchShippingDetails($this.next);
+				// 	}, 10000);
+				// } else {
+				return response.json();
+				// }
+			})
+			.then(data => {
+				const item = req.body;
+				let _id = item.id;
+				data.results.map(item => {
+					shipment.count({ _id }, function (error, results) {
+						if (error) {
+							throw err
+							pino.error(error);
+						}
+						const item = req.body;
+						let _id = item.id;
+						if (results == 0) {
+							if (item.status === 'unshipped') {
+								let itemObj = helpers.buildShipment(item);
+
+								helpers.postShipment(shipment, itemObj);
+								res.send({
+									success: 1,
+									type: 'success'
+								});
+							} else {
+								pino.info("Order Already Shipped");
+								res.send({
+									skipped: 1,
+									type: 'skipped'
+								});
+							}
+						} else {
+							if (item.status !== 'unshipped') {
+								helpers.deleteShipment(shipment, item);
+								res.send({
+									deleted: 1,
+									type: 'deleted'
+								});
+							} else {
+								pino.info("Shipment Already Exists")
+								res.send({
+									skipped: 1,
+									type: 'skipped'
+								});
+							}
+						}
+					})
+				})
+			})
+	})
+
+
 	app.post('/shipments', (req, res) => {
-		const item = req.body;
-		let _id = item.id;
-
-		shipment.count({ _id }, function (error, results) {
-			if (error) {
-				throw err
-				pino.error(error);
-			}
-			const item = req.body;
-			let _id = item.id;
-			if (results == 0) {
-				if (item.status === 'unshipped') {
-					let itemObj = helpers.buildShipment(item);
-
-					helpers.postShipment(shipment, itemObj);
-					res.send({
-						success: 1,
-						type: 'success'
-					});
-				} else {
-					pino.info("Order Already Shipped");
-					res.send({
-						skipped: 1,
-						type: 'skipped'
-					});
-				}
-			} else {
-				if (item.status !== 'unshipped') {
-					helpers.deleteShipment(shipment, item);
-					res.send({
-						deleted: 1,
-						type: 'deleted'
-					});
-				} else {
-					pino.info("Shipment Already Exists")
-					res.send({
-						skipped: 1,
-						type: 'skipped'
-					});
-				}
-			}
-		})
 
 
 	});

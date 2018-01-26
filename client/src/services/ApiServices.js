@@ -9,5 +9,8 @@ export default {
   },
   updateShippingData(params) {
     return Api().post('shipments', params)
+  },
+  getCratejoyShippingData(params) {
+    return Api().get('/api/shipments')
   }
 };

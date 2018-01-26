@@ -17,11 +17,13 @@
     "cors": "^2.8.4",
     "dotenv": "^4.0.0",
     "express": "^4.15.4",
+    "fetch": "^1.1.0",
     "generate-schema": "^2.6.0",
     "helmet": "^3.9.0",
     "moment": "^2.20.1",
     "mongo": "^0.1.0",
     "nodemon": "^1.12.1",
-    "pino": "^4.10.3"
+    "pino": "^4.10.3",
+    "request": "^2.83.0"
   }
 }

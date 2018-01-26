@@ -52,6 +52,13 @@ export default {
     this.loading = false;
   },
   methods: {
+    async getCratejoyShippingData() {
+      const response = await Api.getCratejoyShippingData().catch(err => {
+        this.error = true;
+        this.loading = false;
+      });
+      this.shipments = response.data.shipments;
+    },
     async getProducts() {
       const response = await Api.fetchProducts().catch(err => {
         this.error = true;
@@ -75,7 +82,7 @@ export default {
     },
     updateShippingData(next) {
       let params =
-        "?fulfillments.adjusted_fulfillment_date__ge=2017-7-15T00:00:00Z";
+        "?fulfillments.adjusted_fulfillment_date__ge=2017-11-15T00:00:00Z";
       if (next) {
         this.fetchShippingDetails(next);
       } else {
@@ -87,23 +94,7 @@ export default {
     fetchShippingDetails(params = "") {
       let $this = this;
       $this.loading = true;
-      let options = {
-        headers: {
-          Authorization: API_AUTH,
-          "Content-Type": "application/json"
-        }
-      };
-      let apiUrl = API_SHIPMENTS_URL + params;
-      fetch(apiUrl, options)
-        .then(function(response) {
-          if (response.status == 502) {
-            setTimeout(function() {
-              $this.fetchShippingDetails($this.next);
-            }, 10000);
-          } else {
-            return response.json();
-          }
-        })
+      this.getCratejoyShippingData()
         .then(function(data) {
           data.results.map(item => {
             $this.postShipments(item);
