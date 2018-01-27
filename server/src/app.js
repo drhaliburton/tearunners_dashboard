@@ -18,7 +18,11 @@ app.use(helmet())
 const url = process.env.DB_URL;
 const dbName = process.env.DB_NAME;
 
-MongoClient.connect(url, function (err, client) {
+let options = {
+	socketTimeoutMS: 240000
+};
+
+MongoClient.connect(url, options, function (err, client) {
 	if (err) {
 		throw error;
 		pino.error("Could not connect to the databse");
@@ -40,8 +44,12 @@ MongoClient.connect(url, function (err, client) {
 		});
 	})
 
+	let next = false;
+	let retry = false;
+
+
 	app.get('/api/shipments', (req, res) => {
-		let params = req.query.next ? req.query.next : '?fulfillments.adjusted_fulfillment_date__ge=2017-11-15T00:00:00Z';
+		let params = req.query.next ? req.query.next : '?fulfillments.adjusted_fulfillment_date__ge=2018-1-15T00:00:00Z';
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
 			headers: {
@@ -49,24 +57,21 @@ MongoClient.connect(url, function (err, client) {
 				Authorization: process.env.API_AUTH,
 			},
 		}
-		let next = false;
 		request.get(options, function (error, response, body) {
-			let data = JSON.parse(body);
-			data.results.map(item => {
-				let _id = item.id;
-				shipment.count({ _id }, function (error, results) {
-					if (error) {
-						pino.error(error);
-					}
+
+			if (response.statusCode === 200) {
+				let data = JSON.parse(body);
+				data.results.map(item => {
 					let _id = item.id;
+					let results = shipment.count({ _id })
+					results.then(item => {
+						console.log(item);
+					})
+
 					if (results == 0) {
 						if (item.status === 'unshipped') {
 							let itemObj = helpers.buildShipment(item);
 							helpers.postShipment(shipment, itemObj);
-							res.send({
-								success: 1,
-								type: 'success'
-							});
 						} else {
 							pino.info('Skipped: ', item.status);
 						}
@@ -74,17 +79,29 @@ MongoClient.connect(url, function (err, client) {
 						if (item.status !== 'unshipped') {
 							helpers.deleteShipment(shipment, item);
 						} else {
-							helpers.updateShipment(shipment, item);
+							pino.info('Shipment already exists');
+							// helpers.updateShipment(shipment, item);
 						}
 					}
 				})
-			})
-			if (data.next) {
-				pino.info(data.next);
+				if (data.next) {
+					next = data.next;
+				} else {
+					res.send({
+						success: 1,
+						type: 'success'
+					})
+				}
+			} else {
+				retry = true;
+			}
+		}).on('end', function () {
+			if (next) {
+				console.log('end next', next);
 				let options = {
 					url: process.env.BASE_URL + 'api/shipments',
 					qs: {
-						next: data.next,
+						next: next,
 					}
 				}
 				request.get(options, function (error, response, body) {
@@ -92,13 +109,27 @@ MongoClient.connect(url, function (err, client) {
 						pino.error(error);
 					}
 				})
-			} else {
-				res.send({
-					success: 1,
-					type: 'success'
-				})
+			}
+			if (retry) {
+				console.log('retry', params);
+
+				let options = {
+					url: process.env.BASE_URL + 'api/shipments',
+					qs: {
+						next: params,
+					},
+					agentOptions: {
+						ciphers: 'DES-CBC3-SHA'
+					}
+				}
+				request.get(options, function (error, response, body) {
+					if (error) {
+						pino.error(error);
+					}
+				}).end()
 			}
 		})
+
 	})
 
 	app.get('/api/subscriptions', (req, res) => {
@@ -117,11 +148,14 @@ MongoClient.connect(url, function (err, client) {
 				let body = JSON.stringify(data.results[item])
 				let options = {
 					url: process.env.BASE_URL + 'subscriptions/',
-					body
+					body,
+					agentOptions: {
+						ciphers: 'DES-CBC3-SHA'
+					}
 				}
 				request.post(options, function (error, response, body) {
 					if (error) {
-						throw error;
+						console.error(error)
 					}
 				})
 			}
@@ -141,7 +175,7 @@ MongoClient.connect(url, function (err, client) {
 							pino.error(error);
 						}
 					})
-				}, 100)
+				}, 50)
 			} else {
 				res.send({
 					success: 1,
