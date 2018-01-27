@@ -89,6 +89,8 @@ MongoClient.connect(url, options, function (err, client) {
 					})
 					if (data.next) {
 						next = data.next;
+					} else {
+						next = false;
 					}
 				} else {
 					retry = true;
@@ -111,7 +113,7 @@ MongoClient.connect(url, options, function (err, client) {
 						}).end()
 					}, 1000)
 
-				} else {
+				} else if (retry) {
 					console.log('retry', prev);
 					let options = {
 						url: process.env.BASE_URL + 'api/shipments',
@@ -127,8 +129,12 @@ MongoClient.connect(url, options, function (err, client) {
 				}
 			}).end()
 		} else {
-			next = prev;
-			console.log("SKIPPED ERR", prev)
+			if (next) {
+				next = prev;
+				console.log("SKIPPED ERR", prev)
+			} else {
+				res.send({ success: true })
+			}
 		}
 	})
 
@@ -186,12 +192,13 @@ MongoClient.connect(url, options, function (err, client) {
 							pino.error(error);
 						}
 					}).end()
-				} else {
-					pino.info('retry', prev);
+
+				} else if (retry) {
+					console.log('retry', subPrev);
 					let options = {
 						url: process.env.BASE_URL + 'api/subscriptions',
 						qs: {
-							next: prev,
+							next: subPrev,
 						}
 					}
 					request.get(options, function (error, response, body) {
@@ -202,8 +209,12 @@ MongoClient.connect(url, options, function (err, client) {
 				}
 			}).end()
 		} else {
-			next = prev;
-			console.log("SKIPPED ERR", prev)
+			if (next) {
+				next = subPrev;
+				console.log("SKIPPED ERR", subPrev)
+			} else {
+				res.send({ success: true })
+			}
 		}
 	})
 

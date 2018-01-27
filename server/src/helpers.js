@@ -43,9 +43,9 @@ module.exports = {
     })
   },
   buildSubscription(item) {
-    let [_id, autorenew, end_date, start_date, status] = [item.id, item.autorenew, item.end_date, item.start_date, item.status];
+    let [_id, autorenew, end_date, start_date, status, name] = [item.id, item.autorenew, item.end_date, item.start_date, item.status, item.product.name];
     return {
-      autorenew, end_date, start_date, status, _id
+      autorenew, end_date, start_date, status, _id, name
     };
   },
   postSubscription(subscription, item) {
