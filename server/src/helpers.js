@@ -22,35 +22,25 @@ module.exports = {
       _id
     };
   },
-  async postShipment(shipment, item) {
-    let results = await shipment.insertOne(item, function (err, r) {
-      if (err) {
-        pino.error(err);
-        setTimeout(function () { return }, 10000);
-      }
+  postShipment(shipment, item) {
+    return shipment.insertOne(item, function (err, r) {
+      if (err) { pino.error(err); }
       pino.info("Shipment Added")
     })
-    return results;
   },
-  async updateShipment(shipment, item) {
-    let results = await shipment.findOneAndUpdate({ _id: item.id }, item, { maxTimeMS: 240000 }, function (error, results) {
+  updateShipment(shipment, item) {
+    return shipment.findOneAndUpdate({ _id: item.id }, item, { maxTimeMS: 240000 }, function (error, results) {
       if (error) {
         pino.error(error);
-        setTimeout(function () { return }, 10000);
       }
       pino.info("Shipment Updated")
     })
-    return results;
   },
-  async deleteShipment(shipment, item) {
-    let results = shipment.deleteOne({ _id: item.id }, function (error, results) {
-      if (error) {
-        pino.error(error);
-        setTimeout(function () { return }, 10000);
-      }
+  deleteShipment(shipment, item) {
+    return shipment.deleteOne({ _id: item.id }, function (error, results) {
+      if (error) { pino.error(error); }
       pino.info(results.deletedCount + " Shipment Deleted")
     })
-    return results;
   },
   buildSubscription(item) {
     let [_id, autorenew, end_date, start_date, status] = [item.id, item.autorenew, item.end_date, item.start_date, item.status];
@@ -60,19 +50,13 @@ module.exports = {
   },
   postSubscription(subscription, item) {
     return subscription.insertOne(item, function (err, r) {
-      if (err) {
-        pino.error(err);
-        setTimeout(function () { return }, 10000);
-      }
+      if (err) { pino.error(err); }
       // pino.info("Subscriptions Added")
     })
   },
   deleteSubscription(subscription, item) {
     return subscription.deleteOne({ _id: item.id }, function (error, results) {
-      if (error) {
-        pino.error(error);
-        setTimeout(function () { return }, 10000);
-      }
+      if (error) { pino.error(error); }
       // pino.info("Subscription Deleted")
     })
   }
