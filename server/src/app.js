@@ -44,12 +44,12 @@ MongoClient.connect(url, options, function (err, client) {
 		});
 	})
 
-	let next = false;
-	let retry = false;
-
+	let prev = '?adjusted_ordered_at__ge=2018-1-15T00:00:00Z';
 
 	app.get('/api/shipments', (req, res) => {
-		let params = req.query.next ? req.query.next : '?fulfillments.adjusted_fulfillment_date__ge=2018-1-15T00:00:00Z';
+		let next = false;
+		let retry = false;
+		let params = req.query.next ? req.query.next : prev;
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
 			headers: {
@@ -57,80 +57,83 @@ MongoClient.connect(url, options, function (err, client) {
 				Authorization: process.env.API_AUTH,
 			},
 		}
-		request.get(options, function (error, response, body) {
-
-			if (response.statusCode === 200) {
-				let data = JSON.parse(body);
-				data.results.map(item => {
-					let _id = item.id;
-					let results = shipment.count({ _id })
-					results.then(item => {
-						console.log(item);
+		if (params == "?adjusted_ordered_at__ge=2018-1-15T00:00:00Z" || req.query.next) {
+			request.get(options, (error, response, body) => {
+				if (response.statusCode === 200) {
+					let data = JSON.parse(body);
+					data.results.map(item => {
+						let _id = item.id;
+						let count = shipment.count({ _id })
+						count.then(results => {
+							if (results == 0) {
+								if (item.status === 'unshipped') {
+									let itemObj = helpers.buildShipment(item);
+									let posted = helpers.postShipment(shipment, itemObj);
+									posted.then(result => {
+										return result
+									});
+								} else {
+									pino.info('Skipped: ', item.status);
+								}
+							} else {
+								if (item.status !== 'unshipped') {
+									let deleted = helpers.deleteShipment(shipment, item);
+									deleted.then(result => {
+										return result
+									});
+								} else {
+									pino.info("Order already exists")
+									// let updated = helpers.updateShipment(shipment, item);
+									// updated.then(results)
+								}
+							}
+						})
 					})
-
-					if (results == 0) {
-						if (item.status === 'unshipped') {
-							let itemObj = helpers.buildShipment(item);
-							helpers.postShipment(shipment, itemObj);
-						} else {
-							pino.info('Skipped: ', item.status);
-						}
-					} else {
-						if (item.status !== 'unshipped') {
-							helpers.deleteShipment(shipment, item);
-						} else {
-							pino.info('Shipment already exists');
-							// helpers.updateShipment(shipment, item);
-						}
+					if (data.next) {
+						next = data.next;
 					}
-				})
-				if (data.next) {
-					next = data.next;
 				} else {
-					res.send({
-						success: 1,
-						type: 'success'
-					})
+					retry = true;
 				}
-			} else {
-				retry = true;
-			}
-		}).on('end', function () {
-			if (next) {
-				console.log('end next', next);
-				let options = {
-					url: process.env.BASE_URL + 'api/shipments',
-					qs: {
-						next: next,
-					}
-				}
-				request.get(options, function (error, response, body) {
-					if (error) {
-						pino.error(error);
-					}
-				})
-			}
-			if (retry) {
-				console.log('retry', params);
+				if (next && !retry) {
+					prev = next;
 
-				let options = {
-					url: process.env.BASE_URL + 'api/shipments',
-					qs: {
-						next: params,
-					},
-					agentOptions: {
-						ciphers: 'DES-CBC3-SHA'
+					let options = {
+						url: process.env.BASE_URL + 'api/shipments',
+						qs: {
+							next: next,
+						}
 					}
-				}
-				request.get(options, function (error, response, body) {
-					if (error) {
-						pino.error(error);
-					}
-				}).end()
-			}
-		})
+					setTimeout(function () {
+						request.get(options, function (error, response, body) {
+							if (error) {
+								pino.error(error);
+							}
+						}).end()
+					}, 1000)
 
+				} else {
+					console.log('retry', prev);
+					let options = {
+						url: process.env.BASE_URL + 'api/shipments',
+						qs: {
+							next: prev,
+						}
+					}
+					request.get(options, function (error, response, body) {
+						if (error) {
+							pino.error(error);
+						}
+					}).end()
+				}
+			}).end()
+		} else {
+			next = prev;
+			console.log("SKIPPED ERR", prev)
+		}
 	})
+
+
 
 	app.get('/api/subscriptions', (req, res) => {
 		let params = req.query.next ? req.query.next : '';
