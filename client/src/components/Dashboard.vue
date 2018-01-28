@@ -2,7 +2,7 @@
 <span>
 
   <Loading :loading='loadShipping || loadedSubscriptions'></Loading>
-    <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadShipping ? 'Loading' : 'Sync Shipments'}}
+    <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadShipping ? 'Loading' : 'Sync Orders'}}
       <span class="saving" v-if="loadShipping"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <button @click="loaded || error ? refresh() : getCratejoySubscriptionData()" class="sync">{{loaded || error ? 'Refresh Page' : loadedSubscriptions ? 'Loading' : 'Sync Renewals'}}

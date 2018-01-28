@@ -6,7 +6,7 @@
       {{fillEmptyCells(month.month)}}
       <div class="title">{{month.title}}</div>
 
-        <tr><div class="row-title">Subscriptions</div></tr>
+        <tr><div class="row-title">Orders</div></tr>
         <span class="flex-grid">
           <span v-for="item in month.shipments" :key="item.id">
               <DataCell :item="item"></DataCell>
@@ -19,7 +19,7 @@
             <DataCell :item="item"></DataCell>
           </span>
       </span>
-      <div class="row-title total">Totals</div>
+      <div class="row-title total">Total</div>
       <span class="flex-grid">
         <span v-for="item in month.count" :key="item.name + item.count">
             <DataCell :item="item"></DataCell>

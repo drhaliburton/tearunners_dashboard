@@ -49,7 +49,11 @@ module.exports = {
           let name = item.name.includes("Christmas")
             ? $this.cleanName($this.christmasBox(item.name))
             : $this.cleanName(item.name);
-          let shipmentMonth = $this.getShipmentMonth(item["end_date"]);
+          console.log(item["end_date"]);
+          let shipmentMonth = $this.getRenewalMonth(
+            item["end_date"]
+          );
+          console.log(shipmentMonth)
           if (!result[shipmentMonth]["renewals"][name]) {
             result[shipmentMonth]["renewals"][name] = {
               name,
@@ -99,6 +103,13 @@ module.exports = {
     } else {
       month + 2
     }
+    let shipmentMonth = month > 11 ? month - 12 : month;
+    return shipmentMonth;
+  },
+  getRenewalMonth(param) {
+    let shipmentDate = new Date(param);
+    let month = shipmentDate.getMonth() + 1;
+    let date = shipmentDate.getDate();
     let shipmentMonth = month > 11 ? month - 12 : month;
     return shipmentMonth;
   },
