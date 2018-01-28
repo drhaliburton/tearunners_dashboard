@@ -60,10 +60,6 @@ export default {
     async getCratejoySubscriptionData() {
       this.loadedSubscriptions = true;
       const response = await Api.getCratejoySubscriptionData().catch(err => {});
-      console.log(response);
-      if (response.success) {
-        console.log(success);
-      }
     },
     async getShipments() {
       const response = await Api.fetchShipments().catch(err => {

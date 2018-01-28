@@ -49,11 +49,9 @@ module.exports = {
           let name = item.name.includes("Christmas")
             ? $this.cleanName($this.christmasBox(item.name))
             : $this.cleanName(item.name);
-          console.log(item["end_date"]);
           let shipmentMonth = $this.getRenewalMonth(
             item["end_date"]
           );
-          console.log(shipmentMonth)
           if (!result[shipmentMonth]["renewals"][name]) {
             result[shipmentMonth]["renewals"][name] = {
               name,

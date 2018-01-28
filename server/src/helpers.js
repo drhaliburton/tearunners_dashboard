@@ -57,7 +57,7 @@ module.exports = {
   deleteSubscription(subscription, item) {
     subscription.deleteOne({ _id: item.id }, function (error, results) {
       if (error) { pino.error(error); }
-      pino.info("Subscription Deleted")
+      pino.info(results.deletedCount + " Subscription Deleted")
     })
   }
 }
