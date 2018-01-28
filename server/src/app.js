@@ -121,7 +121,7 @@ MongoClient.connect(url, options, function (err, client) {
 	app.get('/api/subscriptions', (req, res) => {
 		let next = false;
 		let retry = false;
-		let params = req.query.next ? req.query.next : "?autorenew__eq=true";
+		let params = req.query.next ? req.query.next : "";
 		let options = {
 			url: 'http://api.cratejoy.com/v1/subscriptions/' + params,
 			headers: {
@@ -129,7 +129,7 @@ MongoClient.connect(url, options, function (err, client) {
 				Authorization: process.env.API_AUTH,
 			},
 		}
-		if (params == "?autorenew__eq=true" || req.query.next) {
+		if (params == "" || req.query.next) {
 			request.get(options, (error, response, body) => {
 				if (response.statusCode === 200) {
 					let data = JSON.parse(body);
