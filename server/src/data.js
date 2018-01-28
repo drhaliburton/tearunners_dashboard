@@ -64,7 +64,7 @@ module.exports = {
     },
     8: {
       title: "September",
-      month: 7,
+      month: 8,
       count: {},
       shipments: {},
       renewals: {}

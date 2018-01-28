@@ -26,6 +26,15 @@ module.exports = {
             } else {
               result[shipmentMonth]["shipments"][name].count++;
             }
+            if (result[shipmentMonth]["count"][name]) {
+              result[shipmentMonth]["count"][name]["count"] += 1;
+            } else {
+              result[shipmentMonth]["count"][name] = {
+                name: name,
+                count: 1,
+                id: item.id
+              }
+            }
           }
         }
       });
@@ -50,6 +59,15 @@ module.exports = {
             };
           } else {
             result[shipmentMonth]["renewals"][name].count++;
+          }
+          if (result[shipmentMonth]["count"][name]) {
+            result[shipmentMonth]["count"][name]["count"] += 1;
+          } else {
+            result[shipmentMonth]["count"][name] = {
+              name: name,
+              count: 1,
+              id: item.id
+            }
           }
         }
       });

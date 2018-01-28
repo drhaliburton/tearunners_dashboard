@@ -51,17 +51,11 @@ MongoClient.connect(url, options, function (err, client) {
 					pino.error(error);
 				}
 				let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData);
-				console.log(subscriptionData);
 				res.send(subscriptionData);
 			});
-
 		});
-
 	})
 
-	app.get('/subscriptions', (req, res) => {
-
-	})
 
 	let prev = '?adjusted_ordered_at__ge=2018-1-15T00:00:00Z';
 
@@ -101,33 +95,15 @@ MongoClient.connect(url, options, function (err, client) {
 					} else {
 						next = false;
 					}
-				} else {
-					retry = true;
 				}
-				if (next && !retry) {
-					prev = next;
-					pino.info(next);
+				if (next) {
+					subPrev = next;
+					pino.info(next)
 
 					let options = {
 						url: process.env.BASE_URL + 'api/shipments',
 						qs: {
 							next: next,
-						}
-					}
-					setTimeout(function () {
-						request.get(options, function (error, response, body) {
-							if (error) {
-								pino.error(error);
-							}
-						}).end()
-					}, 1000)
-
-				} else if (retry) {
-					console.log('retry', prev);
-					let options = {
-						url: process.env.BASE_URL + 'api/shipments',
-						qs: {
-							next: prev,
 						}
 					}
 					request.get(options, function (error, response, body) {
@@ -138,12 +114,7 @@ MongoClient.connect(url, options, function (err, client) {
 				}
 			}).end()
 		} else {
-			if (next) {
-				next = prev;
-				console.log("SKIPPED ERR", prev)
-			} else {
-				res.send({ success: true })
-			}
+			res.send({ success: true })
 		}
 	})
 
@@ -207,8 +178,6 @@ MongoClient.connect(url, options, function (err, client) {
 			res.send({ success: true })
 		}
 	})
-
-
 
 	const server = app.listen(process.env.PORT || 8081)
 	server.timeout = 240000;
