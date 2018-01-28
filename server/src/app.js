@@ -70,6 +70,7 @@ MongoClient.connect(url, options, function (err, client) {
 				Authorization: process.env.API_AUTH,
 			},
 		}
+		pino.info(params);
 		if (params == "?adjusted_ordered_at__ge=2018-1-15T00:00:00Z" || req.query.next) {
 			request.get(options, (error, response, body) => {
 				if (response.statusCode === 200) {
@@ -96,6 +97,11 @@ MongoClient.connect(url, options, function (err, client) {
 						next = false;
 					}
 				}
+				if (error) {
+					if (response.statusCode !== 502) {
+						throw error;
+					}
+				}
 				if (next) {
 					subPrev = next;
 					let options = {
@@ -110,6 +116,7 @@ MongoClient.connect(url, options, function (err, client) {
 						}
 					}).end()
 				}
+
 			}).end()
 		} else {
 			res.send({ success: true })
@@ -129,6 +136,7 @@ MongoClient.connect(url, options, function (err, client) {
 				Authorization: process.env.API_AUTH,
 			},
 		}
+		pino.info(params);
 		if (params == "" || req.query.next) {
 			request.get(options, (error, response, body) => {
 				if (response.statusCode === 200) {
@@ -153,6 +161,11 @@ MongoClient.connect(url, options, function (err, client) {
 						next = data.next;
 					} else {
 						next = false;
+					}
+				}
+				if (error) {
+					if (response.statusCode !== 502) {
+						throw error;
 					}
 				}
 				if (next) {

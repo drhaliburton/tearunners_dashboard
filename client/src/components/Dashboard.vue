@@ -1,15 +1,15 @@
 <template>
 <span>
 
-  <Loading :loading='loadShipping || loadedSubscriptions'></Loading>
-    <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadShipping ? 'Loading' : 'Sync Orders'}}
-      <span class="saving" v-if="loadShipping"><span>.</span><span>.</span><span>.</span></span>
+  <Loading :loading='loadingShipments || loadingSubscriptions'></Loading>
+    <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingShipments ? 'Loading' : 'Sync Renewals'}}
+      <span class="saving" v-if="loadingShipments"><span>.</span><span>.</span><span>.</span></span>
     </button>
-    <button @click="loaded || error ? refresh() : getCratejoySubscriptionData()" class="sync">{{loaded || error ? 'Refresh Page' : loadedSubscriptions ? 'Loading' : 'Sync Renewals'}}
-      <span class="saving" v-if="loadedSubscriptions"><span>.</span><span>.</span><span>.</span></span>
+    <button @click="loaded || error ? refresh() : getCratejoySubscriptionData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingSubscriptions ? 'Loading' : 'Sync Renewals'}}
+      <span class="saving" v-if="loadingSubscriptions"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <div class="product-count">
-      <template v-if="loadShipping || loadedSubscriptions || loaded">
+      <template v-if="loadingShipments || loadingSubscriptions || loaded">
         <span>Syncing Cratejoy data, please wait.</span>
       </template>
       <template v-if="error">
@@ -39,8 +39,8 @@ export default {
       subscriptions: {},
       shipments: {},
       next: "",
-      loadShipping: false,
-      loadedSubscriptions: false,
+      loadingShipments: false,
+      loadingSubscriptions: false,
       loaded: false,
       error: false,
       success: 0,
@@ -54,11 +54,11 @@ export default {
   },
   methods: {
     async getCratejoyShippingData() {
-      this.loadedShipping = true;
+      this.loadingShipments = true;
       const response = await Api.getCratejoyShippingData().catch(err => {});
     },
     async getCratejoySubscriptionData() {
-      this.loadedSubscriptions = true;
+      this.loadingSubscriptions = true;
       const response = await Api.getCratejoySubscriptionData().catch(err => {});
     },
     async getShipments() {
