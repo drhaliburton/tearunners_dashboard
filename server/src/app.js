@@ -72,52 +72,55 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 		pino.info(params);
 		if (params == "?adjusted_ordered_at__ge=2018-1-15T00:00:00Z" || req.query.next) {
-			request.get(options, (error, response, body) => {
-				if (response.statusCode === 200) {
-					let data = JSON.parse(body);
-					data.results.map(item => {
-						let _id = item.id;
-						let count = shipment.count({ _id })
-						count.then(results => {
-							if (results == 0) {
-								if (item.status === 'unshipped') {
-									let itemObj = helpers.buildShipment(item);
-									helpers.postShipment(shipment, itemObj);
-								}
-							} else {
-								if (item.status !== 'unshipped') {
-									helpers.deleteShipment(shipment, item);
-								}
-							}
-						})
-					})
-					if (data.next) {
-						next = data.next;
-					} else {
-						next = false;
-					}
-				}
-				if (error) {
-					if (response.statusCode !== 502) {
-						throw error;
-					}
-				}
-				if (next) {
-					subPrev = next;
-					let options = {
-						url: process.env.BASE_URL + 'api/shipments',
-						qs: {
-							next: next,
-						}
-					}
-					request.get(options, function (error, response, body) {
-						if (error) {
-							pino.error(error);
-						}
-					}).end()
-				}
+			setTimeout(function () {
 
-			}).end()
+				request.get(options, (error, response, body) => {
+					if (response.statusCode === 200) {
+						let data = JSON.parse(body);
+						data.results.map(item => {
+							let _id = item.id;
+							let count = shipment.count({ _id })
+							count.then(results => {
+								if (results == 0) {
+									if (item.status === 'unshipped') {
+										let itemObj = helpers.buildShipment(item);
+										helpers.postShipment(shipment, itemObj);
+									}
+								} else {
+									if (item.status !== 'unshipped') {
+										helpers.deleteShipment(shipment, item);
+									}
+								}
+							})
+						})
+						if (data.next) {
+							next = data.next;
+						} else {
+							next = false;
+						}
+					}
+					if (error) {
+						if (response.statusCode !== 502) {
+							throw error;
+						}
+					}
+					if (next) {
+						subPrev = next;
+						let options = {
+							url: process.env.BASE_URL + 'api/shipments',
+							qs: {
+								next: next,
+							}
+						}
+						request.get(options, function (error, response, body) {
+							if (error) {
+								pino.error(error);
+							}
+						}).end()
+					}
+
+				}).end()
+			}, 5000)
 		} else {
 			res.send({ success: true })
 		}
@@ -138,51 +141,55 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 		pino.info(params);
 		if (params == "" || req.query.next) {
-			request.get(options, (error, response, body) => {
-				if (response.statusCode === 200) {
-					let data = JSON.parse(body);
-					data.results.map(item => {
-						let _id = item.id;
-						let count = subscription.count({ _id })
-						count.then(results => {
-							if (results == 0) {
-								if (item.status === 'active') {
-									let itemObj = helpers.buildSubscription(item);
-									helpers.postSubscription(subscription, itemObj);
+			setTimeout(function () {
+
+				request.get(options, (error, response, body) => {
+					if (response.statusCode === 200) {
+						let data = JSON.parse(body);
+						data.results.map(item => {
+							let _id = item.id;
+							let count = subscription.count({ _id })
+							count.then(results => {
+								if (results == 0) {
+									if (item.status === 'active') {
+										let itemObj = helpers.buildSubscription(item);
+										helpers.postSubscription(subscription, itemObj);
+									}
+								} else {
+									if (item.status !== 'active') {
+										helpers.deleteSubscription(shipment, item);
+									}
 								}
-							} else {
-								if (item.status !== 'active') {
-									helpers.deleteSubscription(shipment, item);
-								}
-							}
+							})
 						})
-					})
-					if (data.next) {
-						next = data.next;
-					} else {
-						next = false;
-					}
-				}
-				if (error) {
-					if (response.statusCode !== 502) {
-						throw error;
-					}
-				}
-				if (next) {
-					subPrev = next;
-					let options = {
-						url: process.env.BASE_URL + 'api/subscriptions',
-						qs: {
-							next: next,
+						if (data.next) {
+							next = data.next;
+						} else {
+							next = false;
 						}
 					}
-					request.get(options, function (error, response, body) {
-						if (error) {
-							pino.error(error);
+					if (error) {
+						if (response.statusCode !== 502) {
+							throw error;
 						}
-					}).end()
-				}
-			}).end()
+					}
+					if (next) {
+						subPrev = next;
+						let options = {
+							url: process.env.BASE_URL + 'api/subscriptions',
+							qs: {
+								next: next,
+							}
+						}
+						request.get(options, function (error, response, body) {
+							if (error) {
+								pino.error(error);
+							}
+						}).end()
+					}
+				}).end()
+
+			}, 5000)
 		} else {
 			res.send({ success: true })
 		}
