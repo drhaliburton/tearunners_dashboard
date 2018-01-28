@@ -5,7 +5,6 @@ const moment = require('moment');
 module.exports = {
   buildShipment(item) {
     let created_at = moment().format();
-
     let fulfillments = item.fulfillments[0];
     let subscriptions = fulfillments.order.subscriptions[0];
     let _id = item.id;
@@ -24,15 +23,43 @@ module.exports = {
     };
   },
   postShipment(shipment, item) {
-    return shipment.insertOne(item, function (err, r) {
+    shipment.insertOne(item, function (err, r) {
       if (err) { pino.error(err); }
-      pino.info("Shipments Added")
+      pino.info("Shipment Added")
     })
   },
-  deleteShipment(shipment, _id) {
-    shipment.deleteOne({ _id }, function (error, results) {
+  updateShipment(shipment, item) {
+    shipment.findOneAndUpdate({ _id: item.id }, item, { maxTimeMS: 240000 }, function (error, results) {
+      if (error) {
+        pino.error(error);
+      }
+      pino.info("Shipment Updated")
+    })
+  },
+  deleteShipment(shipment, item) {
+    shipment.deleteOne({ _id: item.id }, function (error, results) {
       if (error) { pino.error(error); }
-      pino.info("Shipment Deleted")
+      pino.info(results.deletedCount + " Shipment Deleted")
+    })
+  },
+  buildSubscription(item) {
+    let [_id, autorenew, end_date, start_date, status, name] = [item.id, item.autorenew, item.end_date, item.start_date, item.status, item.product.name];
+    return {
+      autorenew, end_date, start_date, status, _id, name
+    };
+  },
+  postSubscription(subscription, item) {
+    subscription.insertOne(item, function (err, r) {
+      if (err) { pino.error(err); }
+      pino.info("Subscriptions Added")
+    })
+  },
+  deleteSubscription(subscription, item) {
+    subscription.deleteOne({ _id: item.id }, function (error, results) {
+      if (error) { pino.error(error); }
+      pino.info("Subscription Deleted")
     })
   }
 }
+
+

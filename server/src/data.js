@@ -1,6 +1,4 @@
-
-
-export default {
+module.exports = {
   productCount: {
     0: {
       title: "January",
