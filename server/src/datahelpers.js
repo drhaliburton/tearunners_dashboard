@@ -3,7 +3,7 @@ let data = require("./data");
 module.exports = {
   countShipments(shipments) {
     let $this = this;
-    let result = data.productCount;
+    let result = JSON.parse(JSON.stringify(data.productCount));
     if (shipments.length) {
       shipments.map(item => {
         if (item.name) {

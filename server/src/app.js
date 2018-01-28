@@ -37,20 +37,25 @@ MongoClient.connect(url, options, function (err, client) {
 
 
 	app.get('/shipments', (req, res) => {
+		let subscriptionData = {};
+		console.log(subscriptionData);
+
 
 		shipment.find({}).toArray(function (error, shipments) {
 			if (error) {
 				throw error;
 				pino.error(error);
 			}
-			let shipmentData = datahelpers.countShipments(shipments);
+			let shipmentData = {};
+			shipmentData = datahelpers.countShipments(shipments);
 
 			subscription.find({}).toArray(function (error, subscriptions) {
 				if (error) {
 					throw error;
 					pino.error(error);
 				}
-				let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData);
+				let subscriptionData = {};
+				subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData);
 				res.send(subscriptionData);
 			});
 		});
