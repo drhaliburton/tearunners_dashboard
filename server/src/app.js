@@ -33,25 +33,34 @@ MongoClient.connect(url, options, function (err, client) {
 	let shipment = db.collection('Shipments');
 	let subscription = db.collection('Subscriptions');
 	let helpers = require("./helpers");
+	let datahelpers = require("./datahelpers");
+
 
 	app.get('/shipments', (req, res) => {
+
 		shipment.find({}).toArray(function (error, shipments) {
 			if (error) {
 				throw error;
 				pino.error(error);
 			}
-			res.send(shipments);
+			let shipmentData = datahelpers.countShipments(shipments);
+
+			subscription.find({}).toArray(function (error, subscriptions) {
+				if (error) {
+					throw error;
+					pino.error(error);
+				}
+				let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData);
+				console.log(subscriptionData);
+				res.send(subscriptionData);
+			});
+
 		});
+
 	})
 
 	app.get('/subscriptions', (req, res) => {
-		subscription.find({}).toArray(function (error, subscriptions) {
-			if (error) {
-				throw error;
-				pino.error(error);
-			}
-			res.send(subscriptions);
-		});
+
 	})
 
 	let prev = '?adjusted_ordered_at__ge=2018-1-15T00:00:00Z';
