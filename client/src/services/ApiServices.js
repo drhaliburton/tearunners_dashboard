@@ -1,8 +1,8 @@
 import Api from '@/services/Api'
 
 export default {
-  fetchProducts() {
-    return Api().get('products')
+  fetchSubscriptions() {
+    return Api().get('subscriptions')
   },
   fetchShipments() {
     return Api().get('shipments')
@@ -12,5 +12,8 @@ export default {
   },
   getCratejoyShippingData(params) {
     return Api().get('/api/shipments')
+  },
+  getCratejoySubscriptionData(params) {
+    return Api().get('/api/subscriptions')
   }
 };

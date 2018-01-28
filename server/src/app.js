@@ -98,8 +98,6 @@ MongoClient.connect(url, options, function (err, client) {
 				}
 				if (next) {
 					subPrev = next;
-					pino.info(next)
-
 					let options = {
 						url: process.env.BASE_URL + 'api/shipments',
 						qs: {
@@ -123,7 +121,7 @@ MongoClient.connect(url, options, function (err, client) {
 	app.get('/api/subscriptions', (req, res) => {
 		let next = false;
 		let retry = false;
-		let params = req.query.next ? req.query.next : "?status__eq=2";
+		let params = req.query.next ? req.query.next : "?autorenew__eq=true";
 		let options = {
 			url: 'http://api.cratejoy.com/v1/subscriptions/' + params,
 			headers: {
@@ -131,7 +129,7 @@ MongoClient.connect(url, options, function (err, client) {
 				Authorization: process.env.API_AUTH,
 			},
 		}
-		if (params == "?status__eq=2" || req.query.next) {
+		if (params == "?autorenew__eq=true" || req.query.next) {
 			request.get(options, (error, response, body) => {
 				if (response.statusCode === 200) {
 					let data = JSON.parse(body);
@@ -159,8 +157,6 @@ MongoClient.connect(url, options, function (err, client) {
 				}
 				if (next) {
 					subPrev = next;
-					pino.info(next)
-
 					let options = {
 						url: process.env.BASE_URL + 'api/subscriptions',
 						qs: {

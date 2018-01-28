@@ -18,7 +18,7 @@ export default {
   },
   getShipmentMonth(param) {
     let shipmentDate = new Date(param);
-    let month = shipmentDate.getMonth();
+    let month = shipmentDate.getMonth() + 1;
     let date = shipmentDate.getDate();
 
     if (date >= 16) {

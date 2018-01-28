@@ -23,13 +23,13 @@ module.exports = {
     };
   },
   postShipment(shipment, item) {
-    return shipment.insertOne(item, function (err, r) {
+    shipment.insertOne(item, function (err, r) {
       if (err) { pino.error(err); }
       pino.info("Shipment Added")
     })
   },
   updateShipment(shipment, item) {
-    return shipment.findOneAndUpdate({ _id: item.id }, item, { maxTimeMS: 240000 }, function (error, results) {
+    shipment.findOneAndUpdate({ _id: item.id }, item, { maxTimeMS: 240000 }, function (error, results) {
       if (error) {
         pino.error(error);
       }
@@ -37,7 +37,7 @@ module.exports = {
     })
   },
   deleteShipment(shipment, item) {
-    return shipment.deleteOne({ _id: item.id }, function (error, results) {
+    shipment.deleteOne({ _id: item.id }, function (error, results) {
       if (error) { pino.error(error); }
       pino.info(results.deletedCount + " Shipment Deleted")
     })
@@ -49,15 +49,15 @@ module.exports = {
     };
   },
   postSubscription(subscription, item) {
-    return subscription.insertOne(item, function (err, r) {
+    subscription.insertOne(item, function (err, r) {
       if (err) { pino.error(err); }
-      // pino.info("Subscriptions Added")
+      pino.info("Subscriptions Added")
     })
   },
   deleteSubscription(subscription, item) {
-    return subscription.deleteOne({ _id: item.id }, function (error, results) {
+    subscription.deleteOne({ _id: item.id }, function (error, results) {
       if (error) { pino.error(error); }
-      // pino.info("Subscription Deleted")
+      pino.info("Subscription Deleted")
     })
   }
 }

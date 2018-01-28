@@ -1,10 +1,9 @@
 <template>
   <div class="upcoming-shipments">
-    {{this.countUpcomingShipments(shipments)}}
+    <template v-if="productCount">
 
-    <div v-for="month in productCount" :key="month.prod_id">
-          {{fillEmptyCells(month.month)}}
-
+    <div v-for="month in this.productCount" :key="month.prod_id">
+      {{fillEmptyCells(month.month)}}
       <div class="title">{{month.title}}</div>
 
         <tr><div class="row-title">Subscriptions</div></tr>
@@ -20,22 +19,22 @@
             <DataCell :item="item"></DataCell>
           </span>
       </span>
-
       <div class="row-title total">Totals</div>
       <span class="flex-grid">
-        <span v-for="item in month.count" :key="item.id">
+        <span v-for="item in month.count" :key="item.name + item.count">
             <DataCell :item="item"></DataCell>
           </span>
       </span>
 
     </div>
+    </template>
+
   </div>
 </template>
 
 <script>
 import helpers from "@/services/helpers";
 import data from "@/services/data";
-
 import DataCell from "./partials/DataCell";
 
 export default {
@@ -44,107 +43,53 @@ export default {
   components: {
     DataCell
   },
-  mounted() {},
+  mounted() {
+    this.productCount = this.shipments;
+  },
+  updated() {},
+  watch: {
+    shipments: function(val) {
+      this.productCount = this.shipments;
+    }
+  },
   methods: {
     fillEmptyCells(month) {
-      for (var product in this.products) {
-        if (!this.productCount[month]["shipments"][product]) {
-          this.productCount[month]["shipments"][product] = {
-            name: product,
-            count: 0
-          };
-        }
-        if (!this.productCount[month]["renewals"][product]) {
-          this.productCount[month]["renewals"][product] = {
-            name: product,
-            count: 0
-          };
-        }
-        if (!this.productCount[month]["count"][product]) {
-          this.productCount[month]["count"][product] = {
-            name: product,
-            count: 0
-          };
-        }
-      }
-      helpers.orderKeys(this.productCount[month]["count"]);
-      helpers.orderKeys(this.productCount[month]["renewals"]);
-      helpers.orderKeys(this.productCount[month]["shipments"]);
-    },
-    countUpcomingShipments(shipments) {
-      let $this = this;
-      if (shipments.length) {
-        shipments.map(item => {
-          if (item.name) {
-            let name = item.name.includes("Christmas")
-              ? helpers.cleanName(helpers.christmasBox(item.name))
-              : helpers.cleanName(item.name);
-
-            if (!name.includes("Test")) {
-              let shipmentMonth = helpers.getShipmentMonth(
-                item["adjusted_fulfillment_date"]
-              );
-
-              if (!$this.products[name]) {
-                $this.products[name] = {
-                  name: name,
-                  count: 0
-                };
-              }
-
-              if (!$this.productCount[shipmentMonth]["shipments"][name]) {
-                $this.productCount[shipmentMonth]["shipments"][name] = {
-                  name,
-                  count: 1,
-                  id: item.id
-                };
-              } else {
-                $this.productCount[shipmentMonth]["shipments"][name].count++;
-              }
-              this.countProductTotals(shipmentMonth, name);
-            }
-            // $this.countUpcomingRenewals(item);
+      if (this.productCount) {
+        for (var product in this.products) {
+          if (!this.productCount[month]["shipments"][product]) {
+            this.productCount[month]["shipments"][product] = {
+              name: product,
+              count: 0
+            };
           }
-        });
-      }
-    },
-    countUpcomingRenewals(item) {
-      let $this = this;
-      if (item.autorenew && !item.name.includes("Test")) {
-        let name = item.name.includes("Christmas")
-          ? helpers.cleanName(helpers.christmasBox(item.name))
-          : helpers.cleanName(item.name);
-        let shipmentMonth = helpers.getShipmentMonth(item["end_date"]);
-
-        if (!$this.productCount[shipmentMonth]["renewals"][name]) {
-          $this.productCount[shipmentMonth]["renewals"][name] = {
-            name,
-            count: 1,
-            id: item.id
-          };
-        } else {
-          $this.productCount[shipmentMonth]["renewals"][name].count++;
+          if (!this.productCount[month]["renewals"][product]) {
+            this.productCount[month]["renewals"][product] = {
+              name: product,
+              count: 0
+            };
+          }
+          if (!this.productCount[month]["count"][product]) {
+            this.productCount[month]["count"][product] = {
+              name: product,
+              count: 0
+            };
+          }
         }
-        this.countProductTotals(shipmentMonth, name);
-      }
-    },
-    countProductTotals(shipmentMonth, name) {
-      if (!this.productCount[shipmentMonth]["count"][name]) {
-        this.productCount[shipmentMonth].count[name] = {
-          name,
-          count: 1,
-          id: shipmentMonth + name
-        };
-      } else {
-        this.productCount[shipmentMonth]["count"][name].count++;
+        helpers.orderKeys(this.productCount[month]["count"]);
+        helpers.orderKeys(this.productCount[month]["renewals"]);
+        helpers.orderKeys(this.productCount[month]["shipments"]);
       }
     }
   },
-
   data() {
     return {
-      products: {},
-      productCount: data.productCount
+      products: {
+        "Original Box": "Original Box",
+        "Christmas Box": "Christmas Box",
+        "Black Tea Box": "Black Tea Box",
+        "Herbal Tea Box": "Herbal Tea Box"
+      },
+      productCount: {}
     };
   }
 };
@@ -152,6 +97,7 @@ export default {
 
 <style type="text/css">
 .upcoming-shipments {
+  min-height: 400px;
   padding: 0 2rem 4rem;
   margin: auto;
   margin-bottom: 8rem;

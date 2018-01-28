@@ -1,19 +1,19 @@
 <template>
 <span>
 
-  <Loading :loading='loading'></Loading>
-    <button @click="loaded || error ? refresh() : updateShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loading ? 'Loading' : 'Sync Shipments'}}
-      <span class="saving" v-if="loading"><span>.</span><span>.</span><span>.</span></span>
+  <Loading :loading='loadShipping || loadedSubscriptions'></Loading>
+    <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadShipping ? 'Loading' : 'Sync Shipments'}}
+      <span class="saving" v-if="loadShipping"><span>.</span><span>.</span><span>.</span></span>
+    </button>
+    <button @click="loaded || error ? refresh() : getCratejoySubscriptionData()" class="sync">{{loaded || error ? 'Refresh Page' : loadedSubscriptions ? 'Loading' : 'Sync Renewals'}}
+      <span class="saving" v-if="loadedSubscriptions"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <div class="product-count">
-      <template v-if="loading || loaded">
-        <span>{{this.success}} added │ </span>
-        <span> {{this.skipped}} skipped │ </span>
-        <span>{{this.deleted}} deleted</span>
+      <template v-if="loadShipping || loadedSubscriptions || loaded">
+        <span>Syncing Cratejoy data, please wait.</span>
       </template>
       <template v-if="error">
         <span class="error">Error: please refresh and try again.</span>
-
       </template>
     </div>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
@@ -36,10 +36,11 @@ export default {
   },
   data() {
     return {
-      products: [],
+      subscriptions: {},
       shipments: {},
       next: "",
-      loading: false,
+      loadShipping: false,
+      loadedSubscriptions: false,
       loaded: false,
       error: false,
       success: 0,
@@ -53,18 +54,16 @@ export default {
   },
   methods: {
     async getCratejoyShippingData() {
-      const response = await Api.getCratejoyShippingData().catch(err => {
-        this.error = true;
-        this.loading = false;
-      });
-      this.shipments = response.data.shipments;
+      this.loadedShipping = true;
+      const response = await Api.getCratejoyShippingData().catch(err => {});
     },
-    async getProducts() {
-      const response = await Api.fetchProducts().catch(err => {
-        this.error = true;
-        this.loading = false;
-      });
-      this.products = response.data.products;
+    async getCratejoySubscriptionData() {
+      this.loadedSubscriptions = true;
+      const response = await Api.getCratejoySubscriptionData().catch(err => {});
+      console.log(response);
+      if (response.success) {
+        console.log(success);
+      }
     },
     async getShipments() {
       const response = await Api.fetchShipments().catch(err => {
@@ -72,50 +71,6 @@ export default {
         this.loading = false;
       });
       this.shipments = response.data;
-    },
-    async postShipments(data) {
-      const response = await Api.updateShippingData(data).catch(err => {
-        this.error = true;
-        this.loading = false;
-      });
-      this[response.data.type]++;
-    },
-    updateShippingData(next) {
-      let params =
-        "?fulfillments.adjusted_fulfillment_date__ge=2017-11-15T00:00:00Z";
-      if (next) {
-        this.fetchShippingDetails(next);
-      } else {
-        if (next !== false) {
-          this.fetchShippingDetails(params);
-        }
-      }
-    },
-    fetchShippingDetails(params = "") {
-      let $this = this;
-      $this.loading = true;
-      this.getCratejoyShippingData()
-        .then(function(data) {
-          data.results.map(item => {
-            $this.postShipments(item);
-          });
-          if (data.next) {
-            $this.next = data.next;
-          } else {
-            $this.next = false;
-            $this.loaded = true;
-            $this.loading = false;
-          }
-        })
-        .then(() => {
-          if ($this.next) {
-            $this.updateShippingData($this.next);
-          }
-        })
-        .catch(err => {
-          $this.error = true;
-          $this.loading = false;
-        });
     },
     refresh() {
       helpers.refresh();

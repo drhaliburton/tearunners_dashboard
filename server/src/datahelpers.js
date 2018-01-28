@@ -5,7 +5,6 @@ module.exports = {
     let $this = this;
     let result = data.productCount;
     if (shipments.length) {
-      console.log(shipments.length);
       shipments.map(item => {
         if (item.name) {
           let name = item.name.includes("Christmas")
