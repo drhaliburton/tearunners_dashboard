@@ -173,11 +173,11 @@ MongoClient.connect(url, options, function (err, client) {
 					})
 					if (data.next) {
 						next = data.next;
+					} else {
+						next = false;
 					}
-				} else {
-					retry = true;
 				}
-				if (next && !retry) {
+				if (next) {
 					subPrev = next;
 					pino.info(next)
 
@@ -192,29 +192,10 @@ MongoClient.connect(url, options, function (err, client) {
 							pino.error(error);
 						}
 					}).end()
-
-				} else if (retry) {
-					console.log('retry', subPrev);
-					let options = {
-						url: process.env.BASE_URL + 'api/subscriptions',
-						qs: {
-							next: subPrev,
-						}
-					}
-					request.get(options, function (error, response, body) {
-						if (error) {
-							pino.error(error);
-						}
-					}).end()
 				}
 			}).end()
 		} else {
-			if (next) {
-				next = subPrev;
-				console.log("SKIPPED ERR", subPrev)
-			} else {
-				res.send({ success: true })
-			}
+			res.send({ success: true })
 		}
 	})
 
