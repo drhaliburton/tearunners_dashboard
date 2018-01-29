@@ -1,12 +1,18 @@
 let data = require("./data");
+const moment = require('moment');
+
 
 module.exports = {
   countShipments(shipments) {
     let $this = this;
     let result = JSON.parse(JSON.stringify(data.productCount));
+    let lastSync = shipments[0]["created_at"];
     if (shipments.length) {
       shipments.map(item => {
         if (item.name) {
+          if (moment(item.created_at).isAfter(lastSync)) {
+            lastSync = item.created_at;
+          }
           let name = item.name.includes("Christmas")
             ? $this.cleanName($this.christmasBox(item.name))
             : $this.cleanName(item.name);
@@ -38,7 +44,7 @@ module.exports = {
         }
       });
     }
-    return result;
+    return [result, lastSync];
   },
   countRenewals(renewals, shipments) {
     let $this = this;

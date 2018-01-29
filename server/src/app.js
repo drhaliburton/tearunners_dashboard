@@ -50,8 +50,8 @@ MongoClient.connect(url, options, function (err, client) {
 					throw error;
 					pino.error(error);
 				}
-				let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData);
-				res.send(subscriptionData);
+				let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData[0]);
+				res.send({ orders: subscriptionData, lastSync: shipmentData[1] });
 			});
 		});
 	});

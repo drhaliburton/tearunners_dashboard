@@ -1,6 +1,5 @@
 <template>
 <span>
-
   <Loading :loading='loadingShipments || loadingSubscriptions'></Loading>
     <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingShipments ? 'Loading' : 'Sync Orders'}}
       <span class="saving" v-if="loadingShipments"><span>.</span><span>.</span><span>.</span></span>
@@ -8,12 +7,17 @@
     <button @click="loaded || error ? refresh() : getCratejoySubscriptionData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingSubscriptions ? 'Loading' : 'Sync Renewals'}}
       <span class="saving" v-if="loadingSubscriptions"><span>.</span><span>.</span><span>.</span></span>
     </button>
-    <div class="product-count">
+    <div class="product-count notice">
       <template v-if="loadingShipments || loadingSubscriptions || loaded">
         <span>Syncing Cratejoy data, please wait.</span>
+        <br>
       </template>
       <template v-if="error">
-        <span class="error">Error: please refresh and try again.</span>
+        <span class="error notice">Error: please refresh and try again.</span>
+        <br>
+      </template>
+      <template>
+        <span class="notice">Last Sync: {{this.lastSync}}</span>
       </template>
     </div>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
@@ -25,7 +29,6 @@ import Api from "@/services/ApiServices";
 import UpcomingShipments from "./UpcomingShipments";
 import Loading from "./Loading";
 import helpers from "@/services/helpers";
-
 import moment from "moment";
 
 export default {
@@ -38,14 +41,11 @@ export default {
     return {
       subscriptions: {},
       shipments: {},
-      next: "",
+      lastSync: "",
       loadingShipments: false,
       loadingSubscriptions: false,
       loaded: false,
-      error: false,
-      success: 0,
-      deleted: 0,
-      skipped: 0
+      error: false
     };
   },
   mounted() {
@@ -72,7 +72,10 @@ export default {
         this.error = true;
         this.loading = false;
       });
-      this.shipments = response.data;
+      this.shipments = response.data.orders;
+      this.lastSync = moment(response.data.lastSync).format(
+        "dddd, MMMM Do YYYY"
+      );
     },
     refresh() {
       helpers.refresh();
@@ -81,6 +84,9 @@ export default {
 };
 </script>
 <style type="text/css">
+.notice {
+  font-size: 1.1rem;
+}
 .sync {
   margin: 1rem auto 0;
   font-size: 0.2rem;

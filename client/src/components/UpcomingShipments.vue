@@ -6,14 +6,14 @@
       {{fillEmptyCells(month.month)}}
       <div class="title">{{month.title}}</div>
 
-        <tr><div class="row-title">Orders</div></tr>
+        <tr><div class="row-title">Existing Shipments</div></tr>
         <span class="flex-grid">
           <span v-for="item in month.shipments" :key="item.id">
               <DataCell :item="item"></DataCell>
             </span>
         </span>
 
-      <tr><div class="row-title">Renewals</div></tr>
+      <tr><div class="row-title">Expected Renewals</div></tr>
       <span class="flex-grid">
         <span v-for="item in month.renewals" :key="item.id">
             <DataCell :item="item"></DataCell>
@@ -151,7 +151,7 @@ tr {
   margin-top: 1rem;
   padding: 1.5rem;
   padding-left: 0.5rem;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
 }
 .col {
   flex: 2;
