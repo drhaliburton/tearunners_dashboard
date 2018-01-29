@@ -56,10 +56,16 @@ export default {
     async getCratejoyShippingData() {
       this.loadingShipments = true;
       const response = await Api.getCratejoyShippingData().catch(err => {});
+      if (response.success) {
+        this.loaded = true;
+      }
     },
     async getCratejoySubscriptionData() {
       this.loadingSubscriptions = true;
       const response = await Api.getCratejoySubscriptionData().catch(err => {});
+      if (response.success) {
+        this.loaded = true;
+      }
     },
     async getShipments() {
       const response = await Api.fetchShipments().catch(err => {

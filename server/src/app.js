@@ -61,7 +61,7 @@ MongoClient.connect(url, options, function (err, client) {
 	let prev = '?adjusted_ordered_at__ge=2018-1-15T00:00:00Z';
 	let next = false;
 
-	app.get('/api/shipments', (req, res) => {
+	app.get('/api/shipments/', (req, res) => {
 		let params = req.query.next ? req.query.next : next ? next : prev;
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
@@ -105,10 +105,11 @@ MongoClient.connect(url, options, function (err, client) {
 					}
 					if (next) {
 						prev = next;
+						let query = decodeURIComponent(next);
 						let options = {
 							url: process.env.BASE_URL + 'api/shipments/',
 							qs: {
-								next: next,
+								next: query,
 							}
 						}
 						request.get(options, function (error, response, body) {
@@ -174,10 +175,11 @@ MongoClient.connect(url, options, function (err, client) {
 					}
 					if (subNext) {
 						subPrev = subNext;
+						let query = decodeURIComponent(subNext);
 						let options = {
 							url: process.env.BASE_URL + 'api/subscriptions/',
 							qs: {
-								next: subNext,
+								next: query,
 							}
 						}
 						request.get(options, function (error, response, body) {
