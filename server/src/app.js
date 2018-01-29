@@ -37,25 +37,20 @@ MongoClient.connect(url, options, function (err, client) {
 
 
 	app.get('/shipments', (req, res) => {
-		let subscriptionData = {};
-		console.log(subscriptionData);
-
 
 		shipment.find({}).toArray(function (error, shipments) {
 			if (error) {
 				throw error;
 				pino.error(error);
 			}
-			let shipmentData = {};
-			shipmentData = datahelpers.countShipments(shipments);
+			let shipmentData = datahelpers.countShipments(shipments);
 
 			subscription.find({}).toArray(function (error, subscriptions) {
 				if (error) {
 					throw error;
 					pino.error(error);
 				}
-				let subscriptionData = {};
-				subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData);
+				let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData);
 				res.send(subscriptionData);
 			});
 		});
@@ -112,7 +107,7 @@ MongoClient.connect(url, options, function (err, client) {
 					if (next) {
 						subPrev = next;
 						let options = {
-							url: process.env.BASE_URL + 'api/shipments',
+							url: process.env.BASE_URL + 'api/shipments/',
 							qs: {
 								next: next,
 							}
@@ -136,7 +131,7 @@ MongoClient.connect(url, options, function (err, client) {
 	app.get('/api/subscriptions', (req, res) => {
 		let next = false;
 		let retry = false;
-		let params = req.query.next ? req.query.next : "";
+		let params = req.query.next ? req.query.next : subPrev;
 		let options = {
 			url: 'http://api.cratejoy.com/v1/subscriptions/' + params,
 			headers: {
@@ -174,6 +169,7 @@ MongoClient.connect(url, options, function (err, client) {
 						}
 					}
 					if (error) {
+						pino.error(error);
 						if (response.statusCode !== 502) {
 							throw error;
 						}
@@ -181,7 +177,7 @@ MongoClient.connect(url, options, function (err, client) {
 					if (next) {
 						subPrev = next;
 						let options = {
-							url: process.env.BASE_URL + 'api/subscriptions',
+							url: process.env.BASE_URL + 'api/subscriptions/',
 							qs: {
 								next: next,
 							}
