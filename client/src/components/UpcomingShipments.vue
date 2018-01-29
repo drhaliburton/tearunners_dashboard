@@ -135,6 +135,7 @@ tr {
 }
 .row-title {
   margin: 1.8rem;
+  margin-left: 1rem;
 }
 .flex-grid {
   display: flex;
@@ -149,6 +150,7 @@ tr {
   font-weight: 500;
   margin-top: 1rem;
   padding: 1.5rem;
+  padding-left: 0.5rem;
   font-size: 1.4rem;
 }
 .col {
