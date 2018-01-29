@@ -57,12 +57,12 @@ MongoClient.connect(url, options, function (err, client) {
 	});
 
 
-	let prev = '?adjusted_ordered_at__ge=2017-11-15T00:00:00Z';
+
+	let prev = '?adjusted_ordered_at__ge=2018-1-15T00:00:00Z';
+	let next = false;
 
 	app.get('/api/shipments', (req, res) => {
-		let next = false;
-		let retry = false;
-		let params = req.query.next ? req.query.next : prev;
+		let params = req.query.next ? req.query.next : next ? next : prev;
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
 			headers: {
@@ -71,9 +71,8 @@ MongoClient.connect(url, options, function (err, client) {
 			},
 		}
 		pino.info(params);
-		if (params == "?adjusted_ordered_at__ge=2017-11-15T00:00:00Z" || req.query.next) {
+		if (params) {
 			setTimeout(function () {
-
 				request.get(options, (error, response, body) => {
 					if (response.statusCode === 200) {
 						let data = JSON.parse(body);
@@ -105,7 +104,7 @@ MongoClient.connect(url, options, function (err, client) {
 						}
 					}
 					if (next) {
-						subPrev = next;
+						prev = next;
 						let options = {
 							url: process.env.BASE_URL + 'api/shipments/',
 							qs: {
@@ -127,11 +126,10 @@ MongoClient.connect(url, options, function (err, client) {
 	})
 
 	let subPrev = "?autorenew__eq=true";
+	let subNext = false;
 
 	app.get('/api/subscriptions', (req, res) => {
-		let next = false;
-		let retry = false;
-		let params = req.query.next ? req.query.next : subPrev;
+		let params = req.query.next ? req.query.next : subNext ? subNext : subPrev;
 		let options = {
 			url: 'http://api.cratejoy.com/v1/subscriptions/' + params,
 			headers: {
@@ -140,7 +138,7 @@ MongoClient.connect(url, options, function (err, client) {
 			},
 		}
 		pino.info(params);
-		if (params == "" || req.query.next) {
+		if (params) {
 			setTimeout(function () {
 
 				request.get(options, (error, response, body) => {
@@ -163,9 +161,9 @@ MongoClient.connect(url, options, function (err, client) {
 							})
 						})
 						if (data.next) {
-							next = data.next;
+							subNext = data.next;
 						} else {
-							next = false;
+							subNext = false;
 						}
 					}
 					if (error) {
@@ -174,12 +172,12 @@ MongoClient.connect(url, options, function (err, client) {
 							throw error;
 						}
 					}
-					if (next) {
-						subPrev = next;
+					if (subNext) {
+						subPrev = subNext;
 						let options = {
 							url: process.env.BASE_URL + 'api/subscriptions/',
 							qs: {
-								next: next,
+								next: subNext,
 							}
 						}
 						request.get(options, function (error, response, body) {
