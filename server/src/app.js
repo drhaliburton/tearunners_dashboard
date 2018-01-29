@@ -120,7 +120,7 @@ MongoClient.connect(url, options, function (err, client) {
 					}
 
 				}).end()
-			}, 5000)
+			}, 2000)
 		} else {
 			res.send({ success: true })
 		}
@@ -190,7 +190,7 @@ MongoClient.connect(url, options, function (err, client) {
 					}
 				}).end()
 
-			}, 5000)
+			}, 2000)
 		} else {
 			res.send({ success: true })
 		}
