@@ -57,7 +57,7 @@ MongoClient.connect(url, options, function (err, client) {
 	});
 
 
-	let prev = '?adjusted_ordered_at__ge=2018-1-15T00:00:00Z';
+	let prev = '?adjusted_ordered_at__ge=2017-11-15T00:00:00Z';
 
 	app.get('/api/shipments', (req, res) => {
 		let next = false;
@@ -71,7 +71,7 @@ MongoClient.connect(url, options, function (err, client) {
 			},
 		}
 		pino.info(params);
-		if (params == "?adjusted_ordered_at__ge=2018-1-15T00:00:00Z" || req.query.next) {
+		if (params == "?adjusted_ordered_at__ge=2017-11-15T00:00:00Z" || req.query.next) {
 			setTimeout(function () {
 
 				request.get(options, (error, response, body) => {
@@ -126,7 +126,7 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 	})
 
-	let subPrev = "";
+	let subPrev = "?autorenew__eq=true";
 
 	app.get('/api/subscriptions', (req, res) => {
 		let next = false;
