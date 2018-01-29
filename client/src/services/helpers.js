@@ -31,8 +31,8 @@ export default {
   },
   orderKeys(obj, expected) {
     var keys = Object.keys(obj).sort(function keyOrder(k1, k2) {
-      if (k1 > k2) return -1;
-      else if (k1 < k2) return +1;
+      if (k1 < k2) return -1;
+      else if (k1 > k2) return +1;
       else return 0;
     });
 
