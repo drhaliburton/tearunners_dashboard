@@ -62,7 +62,7 @@ MongoClient.connect(url, options, function (err, client) {
 	let next = false;
 
 	app.get('/api/shipments/', (req, res) => {
-		let params = req.query.next ? req.query.next : next ? next : prev;
+		let params = req.query.next ? req.query.next : next ? encodeURIComponent(next) : prev;
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
 			headers: {
@@ -130,7 +130,7 @@ MongoClient.connect(url, options, function (err, client) {
 	let subNext = false;
 
 	app.get('/api/subscriptions', (req, res) => {
-		let params = req.query.next ? req.query.next : subNext ? subNext : subPrev;
+		let params = req.query.next ? req.query.next : subNext ? encodeURIComponent(subNext) : subPrev;
 		let options = {
 			url: 'http://api.cratejoy.com/v1/subscriptions/' + params,
 			headers: {
