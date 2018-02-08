@@ -1,23 +1,23 @@
 <template>
 <span>
   <Loading :loading='loadingShipments || loadingSubscriptions'></Loading>
+      <template v-if="loadingShipments || loadingSubscriptions || loaded">
+        <span class="notice">Syncing Cratejoy data, please wait.</span>
+        <br>
+      </template>
     <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingShipments ? 'Loading' : 'Sync Orders'}}
       <span class="saving" v-if="loadingShipments"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <button @click="loaded || error ? refresh() : getCratejoySubscriptionData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingSubscriptions ? 'Loading' : 'Sync Renewals'}}
       <span class="saving" v-if="loadingSubscriptions"><span>.</span><span>.</span><span>.</span></span>
     </button>
-    <div class="product-count notice">
-      <template v-if="loadingShipments || loadingSubscriptions || loaded">
-        <span>Syncing Cratejoy data, please wait.</span>
-        <br>
-      </template>
+    <div class="notification notice">
       <template v-if="error">
         <span class="error notice">Error: please refresh and try again.</span>
         <br>
       </template>
       <template>
-        <div class="notice">Last Shipment Sync: {{this.lastShipmentSync}}</div>
+        <div class="notice">Last Order Sync: {{this.lastShipmentSync}}</div>
          <div class="notice">Last Renewal Sync: {{this.lastRenewalSync}}</div>
       </template>
     </div>
@@ -97,7 +97,7 @@ export default {
   font-size: 0.2rem;
   width: 160px;
 }
-.product-count {
+.notification {
   font-size: 0.9rem;
   height: 50px;
   margin: 1rem auto;

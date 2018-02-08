@@ -126,7 +126,7 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 	})
 
-	let subPrev = "?autorenew__eq=true";
+	let subPrev = "?autorenew__eq=true&start_date__gt=2018-5-15T00:00:00Z";
 	let subNext = false;
 
 	app.get('/api/subscriptions', (req, res) => {
