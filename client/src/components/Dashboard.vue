@@ -17,7 +17,8 @@
         <br>
       </template>
       <template>
-        <span class="notice">Last Sync: {{this.lastSync}}</span>
+        <div class="notice">Last Shipment Sync: {{this.lastShipmentSync}}</div>
+         <div class="notice">Last Renewal Sync: {{this.lastRenewalSync}}</div>
       </template>
     </div>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
@@ -41,7 +42,8 @@ export default {
     return {
       subscriptions: {},
       shipments: {},
-      lastSync: "",
+      lastRenewalSync: "",
+      lastShipmentSync: "",
       loadingShipments: false,
       loadingSubscriptions: false,
       loaded: false,
@@ -73,7 +75,10 @@ export default {
         this.loading = false;
       });
       this.shipments = response.data.orders;
-      this.lastSync = moment(response.data.lastSync).format(
+      this.lastShipmentSync = moment(response.data.lastSync[0]).format(
+        "dddd, MMMM Do YYYY"
+      );
+      this.lastRenewalSync = moment(response.data.lastSync[1]).format(
         "dddd, MMMM Do YYYY"
       );
     },

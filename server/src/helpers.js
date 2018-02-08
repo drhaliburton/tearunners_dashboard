@@ -43,9 +43,10 @@ module.exports = {
     })
   },
   buildSubscription(item) {
+    let created_at = moment().format();
     let [_id, autorenew, end_date, start_date, status, name] = [item.id, item.autorenew, item.end_date, item.start_date, item.status, item.product.name];
     return {
-      autorenew, end_date, start_date, status, _id, name
+      autorenew, end_date, start_date, status, _id, name, created_at
     };
   },
   postSubscription(subscription, item) {

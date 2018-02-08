@@ -51,9 +51,14 @@ module.exports = {
   countRenewals(renewals, shipments) {
     let $this = this;
     let result = shipments;
+    let lastSync = renewals[0]["created_at"] ? renewals[0]["created_at"] : moment().format();
+
     if (renewals.length) {
       renewals.map(item => {
         if (item.autorenew && !item.name.includes("Test")) {
+          if (item.created_at && moment(item.created_at).isAfter(lastSync)) {
+            lastSync = item.created_at;
+          }
           let name = item.name.includes("Christmas")
             ? $this.cleanName($this.christmasBox(item.name))
             : $this.cleanName(item.name);
@@ -83,7 +88,7 @@ module.exports = {
         }
       });
     }
-    return result;
+    return [result, lastSync];
   },
   refresh() {
     window.location.reload()
