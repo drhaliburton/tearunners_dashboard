@@ -51,12 +51,15 @@ module.exports = {
   countRenewals(renewals, shipments) {
     let $this = this;
     let result = shipments;
-    let lastSync = renewals[0]["created_at"] ? renewals[0]["created_at"] : moment().format();
+    let lastSync = false;
 
     if (renewals.length) {
       renewals.map(item => {
         if (item.autorenew && !item.name.includes("Test")) {
-          if (item.created_at && moment(item.created_at).isAfter(lastSync)) {
+          if (item.created_at && !lastSync) {
+            lastSync = item.created_at;
+          }
+          if (moment(item.created_at).isAfter(lastSync)) {
             lastSync = item.created_at;
           }
           let name = item.name.includes("Christmas")
