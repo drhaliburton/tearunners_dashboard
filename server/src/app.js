@@ -72,39 +72,46 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 		pino.info(params);
 		if (params) {
-			setTimeout(function () {
+			let shipmentsRequest = new Promise((resolve, reject) => {
 				request.get(options, (error, response, body) => {
-					if (response.statusCode === 200) {
-						let data = JSON.parse(body);
-						data.results.map(item => {
-							let _id = item.id;
-							let count = shipment.count({ _id })
-							count.then(results => {
-								if (results == 0) {
-									if (item.status === 'unshipped') {
-										let itemObj = helpers.buildShipment(item);
-										helpers.postShipment(shipment, itemObj);
-									}
-								} else {
-									if (item.status !== 'unshipped') {
-										helpers.deleteShipment(shipment, item);
-									}
-								}
-							})
-						})
-						if (data.next) {
-							next = data.next;
-						} else {
-							next = false;
-						}
-					}
 					if (error) {
 						if (response.statusCode !== 502) {
 							throw error;
 						}
 					}
+					if (response.statusCode === 200) {
+						let data = JSON.parse(body);
+						resolve(data);
+					}
+				})
+			})
+
+			shipmentsRequest.then(shipmentData => {
+				shipmentData.results.map(item => {
+					let _id = item.id;
+					let count = shipment.count({ _id })
+					count.then(results => {
+						if (results == 0) {
+							if (item.status === 'unshipped') {
+								let itemObj = helpers.buildShipment(item);
+								helpers.postShipment(shipment, itemObj);
+							}
+						} else {
+							if (item.status !== 'unshipped') {
+								console.log(item.status)
+								helpers.deleteShipment(shipment, item);
+							}
+						}
+					})
+				})
+				if (shipmentData.next) {
+					return shipmentData.next;
+				} else {
+					prev = next;
+				}
+			})
+				.then(next => {
 					if (next) {
-						prev = next;
 						let query = decodeURIComponent(next);
 						let options = {
 							url: process.env.BASE_URL + 'api/shipments/',
@@ -118,9 +125,10 @@ MongoClient.connect(url, options, function (err, client) {
 							}
 						}).end()
 					}
-
-				}).end()
-			}, 2000)
+				})
+				.catch(err => {
+					pino.error(err);
+				})
 		} else {
 			res.send({ success: true })
 		}
@@ -140,42 +148,48 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 		pino.info(params);
 		if (params) {
-			setTimeout(function () {
 
+			let subscriptionRequest = new Promise((resolve, reject) => {
 				request.get(options, (error, response, body) => {
-					if (response.statusCode === 200) {
-						let data = JSON.parse(body);
-						data.results.map(item => {
-							let _id = item.id;
-							let count = subscription.count({ _id })
-							count.then(results => {
-								if (results == 0) {
-									if (item.status === 'active') {
-										let itemObj = helpers.buildSubscription(item);
-										helpers.postSubscription(subscription, itemObj);
-									}
-								} else {
-									if (item.status !== 'active') {
-										helpers.deleteSubscription(shipment, item);
-									}
-								}
-							})
-						})
-						if (data.next) {
-							subNext = data.next;
-						} else {
-							subNext = false;
-						}
-					}
 					if (error) {
-						pino.error(error);
 						if (response.statusCode !== 502) {
 							throw error;
 						}
 					}
-					if (subNext) {
-						subPrev = subNext;
-						let query = decodeURIComponent(subNext);
+					if (response.statusCode === 200) {
+						let data = JSON.parse(body);
+						resolve(data);
+					}
+				})
+			})
+
+			subscriptionRequest.then(subscriptionData => {
+				subscriptionData.results.map(item => {
+					let _id = item.id;
+					let count = subscription.count({ _id })
+					count.then(results => {
+						if (results == 0) {
+							if (item.status === 'active') {
+								let itemObj = helpers.buildSubscription(item);
+								helpers.postSubscription(subscription, itemObj);
+							}
+						} else {
+							if (item.status !== 'active') {
+								console.log(item.status)
+								helpers.deleteSubscription(subscription, item);
+							}
+						}
+					})
+				})
+				if (subscriptionData.next) {
+					return subscriptionData.next;
+				} else {
+					subPrev = subNext;
+				}
+			})
+				.then(next => {
+					if (next) {
+						let query = decodeURIComponent(next);
 						let options = {
 							url: process.env.BASE_URL + 'api/subscriptions/',
 							qs: {
@@ -188,9 +202,10 @@ MongoClient.connect(url, options, function (err, client) {
 							}
 						}).end()
 					}
-				}).end()
-
-			}, 2000)
+				})
+				.catch(err => {
+					pino.error(err);
+				})
 		} else {
 			res.send({ success: true })
 		}

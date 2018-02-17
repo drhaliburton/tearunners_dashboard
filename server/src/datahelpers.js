@@ -56,11 +56,13 @@ module.exports = {
     if (renewals.length) {
       renewals.map(item => {
         if (item.autorenew && !item.name.includes("Test")) {
-          if (item.created_at && !lastSync) {
-            lastSync = item.created_at;
-          }
-          if (moment(item.created_at).isAfter(lastSync)) {
-            lastSync = item.created_at;
+          if (item.created_at) {
+            if (!lastSync) {
+              lastSync = item.created_at;
+            }
+            if (moment(item.created_at).isAfter(lastSync)) {
+              lastSync = item.created_at;
+            }
           }
           let name = item.name.includes("Christmas")
             ? $this.cleanName($this.christmasBox(item.name))
