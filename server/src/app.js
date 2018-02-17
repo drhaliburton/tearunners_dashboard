@@ -134,7 +134,7 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 	})
 
-	let subPrev = "?autorenew__eq=true";
+	let subPrev = "";
 	let subNext = false;
 
 	app.get('/api/subscriptions', (req, res) => {
