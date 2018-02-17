@@ -105,6 +105,7 @@ MongoClient.connect(url, options, function (err, client) {
 					})
 				})
 				if (shipmentData.next) {
+					let next = shipmentData.next;
 					return shipmentData.next;
 				} else {
 					prev = next;
@@ -182,6 +183,7 @@ MongoClient.connect(url, options, function (err, client) {
 					})
 				})
 				if (subscriptionData.next) {
+					subNext = subscriptionData.next;
 					return subscriptionData.next;
 				} else {
 					subPrev = subNext;
