@@ -105,7 +105,7 @@ MongoClient.connect(url, options, function (err, client) {
 					})
 				})
 				if (shipmentData.next) {
-					let next = shipmentData.next;
+					next = shipmentData.next;
 					return shipmentData.next;
 				} else {
 					prev = next;
@@ -135,7 +135,7 @@ MongoClient.connect(url, options, function (err, client) {
 		}
 	})
 
-	let subPrev = "";
+	let subPrev = "?";
 	let subNext = false;
 
 	app.get('/api/subscriptions', (req, res) => {
