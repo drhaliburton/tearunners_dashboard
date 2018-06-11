@@ -4,10 +4,7 @@
 
     <div v-for="month in this.productCount" :key="month.prod_id">
       {{fillEmptyCells(month.month)}}
-      <div class="title">{{month.title}}
-
-      </div>
-
+      <div class="title">{{month.title}}</div>
 
         <tr><div class="row-title">Existing Shipments</div></tr>
         <span class="flex-grid">

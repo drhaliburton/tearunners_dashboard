@@ -36,6 +36,7 @@ MongoClient.connect(url, options, function (err, client) {
 	let datahelpers = require("./datahelpers");
 
 
+
 	app.get('/shipments', (req, res) => {
 
 		shipment.find({}).toArray(function (error, shipments) {
@@ -44,14 +45,17 @@ MongoClient.connect(url, options, function (err, client) {
 				pino.error(error);
 			}
 			let shipmentData = datahelpers.countShipments(shipments);
+			shipmentsDb = shipments;
 
 			subscription.find({}).toArray(function (error, subscriptions) {
 				if (error) {
 					throw error;
 					pino.error(error);
 				}
-				let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData[0]);
-				res.send({ orders: subscriptionData[0], lastSync: [shipmentData[1], subscriptionData[1]] });
+				if (shipmentData) {
+					let subscriptionData = datahelpers.countRenewals(subscriptions, shipmentData[0]);
+					res.send({ orders: subscriptionData[0], lastSync: [shipmentData[1], subscriptionData[1]] });
+				}
 			});
 		});
 	});
@@ -62,7 +66,9 @@ MongoClient.connect(url, options, function (err, client) {
 	let next = false;
 
 	app.get('/api/shipments/', (req, res) => {
-		let params = req.query.next ? req.query.next : next ? encodeURIComponent(next) : prev;
+
+		let params = req.query.next ? req.query.next : next ? next : prev;
+
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
 			headers: {
@@ -71,12 +77,24 @@ MongoClient.connect(url, options, function (err, client) {
 			},
 		}
 		pino.info(params);
+
 		if (params) {
 			let shipmentsRequest = new Promise((resolve, reject) => {
+				shipment.find({}).toArray(function (error, shipments) {
+					if (error) {
+						reject(error);
+						pino.error(error);
+					} else {
+						resolve(shipments)
+					}
+				});
+			})
+
+			let cratejoyRequest = new Promise((resolve, reject) => {
 				request.get(options, (error, response, body) => {
 					if (error) {
 						if (response.statusCode !== 502) {
-							throw error;
+							reject(error);
 						}
 					}
 					if (response.statusCode === 200) {
@@ -86,46 +104,64 @@ MongoClient.connect(url, options, function (err, client) {
 				})
 			})
 
-			shipmentsRequest.then(shipmentData => {
-				shipmentData.results.map(item => {
-					let _id = item.id;
-					let count = shipment.count({ _id })
-					count.then(results => {
-						if (results == 0) {
-							if (item.status === 'unshipped') {
-								let itemObj = helpers.buildShipment(item);
-								helpers.postShipment(shipment, itemObj);
-							}
-						} else {
-							if (item.status !== 'unshipped') {
-								console.log(item.status)
-								helpers.deleteShipment(shipment, item);
+			Promise.all([cratejoyRequest, shipmentsRequest])
+				.then(promiseData => {
+					let cratejoyData = promiseData[0];
+					let shipmentsDb = promiseData[1];
+					let shipmentPromises = [];
+
+					cratejoyData.results.map(item => {
+						let cratejoyId = item.id;
+
+						for (var shipment in shipmentsDb) {
+							if (shipmentsDb[shipment]["_id"] === cratejoyId) {
+								if (item.status !== 'unshipped') {
+									let itemObj = helpers.buildShipment(item);
+									let deletePromise = helpers.deleteShipment(db.collection('Shipments'), item);
+									console.log(deletions);
+									shipmentPromises.push(deletePromise);
+									break;
+								} else {
+									let itemObj = helpers.buildShipment(item);
+									let updatePromise = helpers.updateShipment(db.collection('Shipments'), itemObj);
+									shipmentPromises.push(updatePromise);
+									break;
+								}
+							} else {
+								if (item.status === 'unshipped') {
+									let itemObj = helpers.buildShipment(item);
+									let postPromise = helpers.postShipment(db.collection('Shipments'), itemObj);
+									shipmentPromises.push(postPromise);
+									break;
+								}
 							}
 						}
 					})
+
+					return [shipmentPromises, cratejoyData.next];
 				})
-				if (shipmentData.next) {
-					next = shipmentData.next;
-					return shipmentData.next;
-				} else {
-					prev = next;
-				}
-			})
-				.then(next => {
-					if (next) {
-						let query = decodeURIComponent(next);
-						let options = {
-							url: process.env.BASE_URL + 'api/shipments/',
-							qs: {
-								next: query,
-							}
-						}
-						request.get(options, function (error, response, body) {
-							if (error) {
-								pino.error(error);
-							}
-						}).end()
+				.then(data => {
+					let cratejoyNext = data[1];
+					if (cratejoyNext) {
+						next = cratejoyNext;
 					}
+					Promise.all(data[0])
+						.then(data => {
+
+							if (next) {
+								let options = {
+									url: process.env.BASE_URL + 'api/shipments/',
+									qs: {
+										next: next,
+									}
+								}
+								request.get(options, function (error, response, body) {
+									if (error) {
+										pino.error(error);
+									}
+								}).end()
+							}
+						})
 				})
 				.catch(err => {
 					pino.error(err);
@@ -176,7 +212,6 @@ MongoClient.connect(url, options, function (err, client) {
 							}
 						} else {
 							if (item.status !== 'active') {
-								console.log(item.status)
 								helpers.deleteSubscription(subscription, item);
 							}
 						}

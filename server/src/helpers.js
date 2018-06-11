@@ -23,24 +23,64 @@ module.exports = {
     };
   },
   postShipment(shipment, item) {
-    shipment.insertOne(item, function (err, r) {
-      if (err) { pino.error(err); }
-      pino.info("Shipment Added")
+    let _id = item._id;
+    delete item._id
+
+    let result = new Promise((resolve, reject) => {
+      shipment.replaceOne({ _id: _id }, item, { upsert: true }, function (err, r) {
+        if (err) {
+          pino.error(err);
+          reject(error)
+        } else {
+          pino.info("Shipment Added", r);
+          resolve(r);
+        }
+      })
     })
+    return result;
+
+
+    // shipment.insertOne(item, function (err, r) {
+    //   if (err) { pino.error(err); }
+    //   pino.info("Shipment Added", r)
+    // })
   },
   updateShipment(shipment, item) {
-    shipment.findOneAndUpdate({ _id: item.id }, item, { maxTimeMS: 240000 }, function (error, results) {
-      if (error) {
-        pino.error(error);
-      }
-      pino.info("Shipment Updated")
+
+    let result = new Promise((resolve, reject) => {
+      shipment.findOneAndUpdate({ _id: item._id },
+        {
+          $set: { "end_date": item.end_date },
+          $set: { "subscriptions": item.subscriptions },
+          $set: { "fulfillments": item.fulfillments },
+          $set: { "adjusted_fulfillment_date": item.adjusted_fulfillment_date },
+          $set: { "autorenew": item.autorenew }
+        }, function (error, results) {
+          if (error) {
+            pino.error(error);
+            reject(error);
+          } else {
+            pino.info("Shipment Updated", results.ok)
+            resolve(results);
+          }
+        })
     })
+    return result;
+
   },
   deleteShipment(shipment, item) {
-    shipment.deleteOne({ _id: item.id }, function (error, results) {
-      if (error) { pino.error(error); }
-      pino.info(results.deletedCount + " Shipment Deleted")
+    let result = new Promise((resolve, reject) => {
+      shipment.deleteOne({ _id: item.id }, function (error, results) {
+        if (error) {
+          reject(error);
+          pino.error(error);
+        } else {
+          pino.info(results.deletedCount + " Shipment Deleted")
+          resolve(results);
+        }
+      })
     })
+    return result;
   },
   buildSubscription(item) {
     let created_at = moment().format();
