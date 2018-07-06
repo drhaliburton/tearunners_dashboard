@@ -60,12 +60,10 @@ MongoClient.connect(url, options, function (err, client) {
 	});
 
 
-	let next = '?';
+	let next = '?page=550';
 
 	app.get('/api/shipments/', (req, res) => {
-
 		let params = req.query.next ? req.query.next : next;
-
 		let options = {
 			url: 'http://api.cratejoy.com/v1/shipments/' + params,
 			headers: {
@@ -109,6 +107,7 @@ MongoClient.connect(url, options, function (err, client) {
 
 					cratejoyData.results.map(item => {
 						let cratejoyId = item.id;
+						console.log(item.status);
 
 						for (var shipment in shipmentsDb) {
 							if (shipmentsDb[shipment]["_id"] === cratejoyId) {
@@ -164,7 +163,6 @@ MongoClient.connect(url, options, function (err, client) {
 	})
 
 	let subNext = '?';
-
 	//update subscription data
 	app.get('/api/subscriptions', (req, res) => {
 
