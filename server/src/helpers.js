@@ -108,13 +108,6 @@ module.exports = {
       if (error) { pino.error(error); }
       pino.info(results.deletedCount + " Subscription Deleted")
     })
-  },
-  getNextPage(options, request) {
-    request.get(options, function (error, response, body) {
-      if (error) {
-        pino.error(error);
-      }
-    }).end()
   }
 }
 
