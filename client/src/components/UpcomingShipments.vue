@@ -6,23 +6,23 @@
       {{fillEmptyCells(month.month)}}
       <div class="title">{{month.title}}</div>
 
-        <tr><div class="row-title">Orders</div></tr>
+        <tr><div class="row-title">Existing Shipments</div></tr>
         <span class="flex-grid">
           <span v-for="item in month.shipments" :key="item.id">
-              <DataCell :item="item"></DataCell>
+              <DataCell :item="item" v-if="item.name"></DataCell>
             </span>
         </span>
 
-      <tr><div class="row-title">Renewals</div></tr>
+      <tr><div class="row-title">Expected Renewals</div></tr>
       <span class="flex-grid">
         <span v-for="item in month.renewals" :key="item.id">
-            <DataCell :item="item"></DataCell>
+            <DataCell :item="item" v-if="item.name"></DataCell>
           </span>
       </span>
       <div class="row-title total">Total</div>
       <span class="flex-grid">
         <span v-for="item in month.count" :key="item.name + item.count">
-            <DataCell :item="item"></DataCell>
+            <DataCell :item="item" v-if="item.name"></DataCell>
           </span>
       </span>
 
@@ -102,7 +102,7 @@ export default {
   margin: auto;
   margin-bottom: 8rem;
   width: 80%;
-  max-width: 800px;
+  max-width: 900px;
   border: 1px solid #bbbbbb;
   border-radius: 10px;
 }
@@ -126,7 +126,7 @@ export default {
 }
 td {
   text-align: center;
-  width: 200px;
+  width: 170px;
   border-bottom: none;
 }
 
@@ -151,7 +151,7 @@ tr {
   margin-top: 1rem;
   padding: 1.5rem;
   padding-left: 0.5rem;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
 }
 .col {
   flex: 2;

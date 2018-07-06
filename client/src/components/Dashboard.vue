@@ -1,19 +1,24 @@
 <template>
 <span>
-
   <Loading :loading='loadingShipments || loadingSubscriptions'></Loading>
+      <template v-if="loadingShipments || loadingSubscriptions || loaded">
+        <span class="notice">Syncing Cratejoy data, please wait.</span>
+        <br>
+      </template>
     <button @click="loaded || error ? refresh() : getCratejoyShippingData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingShipments ? 'Loading' : 'Sync Orders'}}
       <span class="saving" v-if="loadingShipments"><span>.</span><span>.</span><span>.</span></span>
     </button>
     <button @click="loaded || error ? refresh() : getCratejoySubscriptionData()" class="sync">{{loaded || error ? 'Refresh Page' : loadingSubscriptions ? 'Loading' : 'Sync Renewals'}}
       <span class="saving" v-if="loadingSubscriptions"><span>.</span><span>.</span><span>.</span></span>
     </button>
-    <div class="product-count">
-      <template v-if="loadingShipments || loadingSubscriptions || loaded">
-        <span>Syncing Cratejoy data, please wait.</span>
-      </template>
+    <div class="notification notice">
       <template v-if="error">
-        <span class="error">Error: please refresh and try again.</span>
+        <span class="error notice">Error: please refresh and try again.</span>
+        <br>
+      </template>
+      <template>
+        <div class="notice">Last Order Sync: {{this.lastShipmentSync}}</div>
+         <div class="notice">Last Renewal Sync: {{this.lastRenewalSync}}</div>
       </template>
     </div>
   <UpcomingShipments :shipments='shipments'></UpcomingShipments>
@@ -25,7 +30,6 @@ import Api from "@/services/ApiServices";
 import UpcomingShipments from "./UpcomingShipments";
 import Loading from "./Loading";
 import helpers from "@/services/helpers";
-
 import moment from "moment";
 
 export default {
@@ -38,14 +42,12 @@ export default {
     return {
       subscriptions: {},
       shipments: {},
-      next: "",
+      lastRenewalSync: "",
+      lastShipmentSync: "",
       loadingShipments: false,
       loadingSubscriptions: false,
       loaded: false,
-      error: false,
-      success: 0,
-      deleted: 0,
-      skipped: 0
+      error: false
     };
   },
   mounted() {
@@ -72,7 +74,13 @@ export default {
         this.error = true;
         this.loading = false;
       });
-      this.shipments = response.data;
+      this.shipments = response.data.orders;
+      this.lastShipmentSync = moment(response.data.lastSync[0]).format(
+        "dddd, MMMM Do YYYY"
+      );
+      this.lastRenewalSync = moment(response.data.lastSync[1]).format(
+        "dddd, MMMM Do YYYY"
+      );
     },
     refresh() {
       helpers.refresh();
@@ -81,12 +89,15 @@ export default {
 };
 </script>
 <style type="text/css">
+.notice {
+  font-size: 1.1rem;
+}
 .sync {
   margin: 1rem auto 0;
   font-size: 0.2rem;
   width: 160px;
 }
-.product-count {
+.notification {
   font-size: 0.9rem;
   height: 50px;
   margin: 1rem auto;

@@ -1,51 +1,71 @@
 let data = require("./data");
+const moment = require('moment');
+
 
 module.exports = {
   countShipments(shipments) {
     let $this = this;
     let result = JSON.parse(JSON.stringify(data.productCount));
     if (shipments.length) {
-      shipments.map(item => {
-        if (item.name) {
-          let name = item.name.includes("Christmas")
-            ? $this.cleanName($this.christmasBox(item.name))
-            : $this.cleanName(item.name);
-
-          if (!name.includes("Test")) {
-            let shipmentMonth = $this.getShipmentMonth(
-              item["adjusted_fulfillment_date"]
-            );
-
-            if (!result[shipmentMonth]["shipments"][name]) {
-              result[shipmentMonth]["shipments"][name] = {
-                name,
-                count: 1,
-                id: item.id
-              };
-            } else {
-              result[shipmentMonth]["shipments"][name].count++;
+      let lastSync = shipments[0]["created_at"];
+      if (shipments.length) {
+        shipments.map(item => {
+          if (item.name) {
+            if (moment(item.created_at).isAfter(lastSync)) {
+              lastSync = item.created_at;
             }
-            if (result[shipmentMonth]["count"][name]) {
-              result[shipmentMonth]["count"][name]["count"] += 1;
-            } else {
-              result[shipmentMonth]["count"][name] = {
-                name: name,
-                count: 1,
-                id: item.id
+            let name = item.name.includes("Christmas")
+              ? $this.cleanName($this.christmasBox(item.name))
+              : $this.cleanName(item.name);
+
+            if (!name.includes("Test")) {
+              let shipmentMonth = $this.getShipmentMonth(
+                item["adjusted_fulfillment_date"]
+              );
+
+              if (!result[shipmentMonth]["shipments"][name]) {
+                result[shipmentMonth]["shipments"][name] = {
+                  name,
+                  count: 1,
+                  id: item.id
+                };
+              } else {
+                result[shipmentMonth]["shipments"][name].count++;
               }
+              if (result[shipmentMonth]["count"][name]) {
+                result[shipmentMonth]["count"][name]["count"] += 1;
+              } else {
+                result[shipmentMonth]["count"][name] = {
+                  name: name,
+                  count: 1,
+                  id: item.id
+                }
+              }
+              result[shipmentMonth]["count"]["atotal"]["count"] += 1;
+              result[shipmentMonth]["shipments"]["atotal"]["count"] += 1;
             }
           }
-        }
-      });
+        });
+      }
+      return [result, lastSync];
     }
-    return result;
   },
   countRenewals(renewals, shipments) {
     let $this = this;
     let result = shipments;
+    let lastSync = false;
+
     if (renewals.length) {
       renewals.map(item => {
         if (item.autorenew && !item.name.includes("Test")) {
+          if (item.created_at) {
+            if (!lastSync) {
+              lastSync = item.created_at;
+            }
+            if (moment(item.created_at).isAfter(lastSync)) {
+              lastSync = item.created_at;
+            }
+          }
           let name = item.name.includes("Christmas")
             ? $this.cleanName($this.christmasBox(item.name))
             : $this.cleanName(item.name);
@@ -70,10 +90,12 @@ module.exports = {
               id: item.id
             }
           }
+          result[shipmentMonth]["count"]["atotal"]["count"] += 1;
+          result[shipmentMonth]["renewals"]["atotal"]["count"] += 1;
         }
       });
     }
-    return result;
+    return [result, lastSync];
   },
   refresh() {
     window.location.reload()
@@ -110,24 +132,6 @@ module.exports = {
     let date = shipmentDate.getDate();
     let shipmentMonth = month > 11 ? month - 12 : month;
     return shipmentMonth;
-  },
-  orderKeys(obj, expected) {
-    var keys = Object.keys(obj).sort(function keyOrder(k1, k2) {
-      if (k1 > k2) return -1;
-      else if (k1 < k2) return +1;
-      else return 0;
-    });
-
-    var i,
-      after = {};
-    for (i = 0; i < keys.length; i++) {
-      after[keys[i]] = obj[keys[i]];
-      delete obj[keys[i]];
-    }
-
-    for (i = 0; i < keys.length; i++) {
-      obj[keys[i]] = after[keys[i]];
-    }
-    return obj;
   }
+
 };
