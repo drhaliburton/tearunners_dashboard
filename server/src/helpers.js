@@ -90,10 +90,20 @@ module.exports = {
     };
   },
   postSubscription(subscription, item) {
-    subscription.insertOne(item, function (err, r) {
-      if (err) { pino.error(err); }
-      pino.info("Subscriptions Added")
+    let _id = item._id;
+    delete item._id
+    let result = new Promise((resolve, reject) => {
+      subscription.replaceOne({ _id: _id }, item, { upsert: true }, function (err, r) {
+        if (err) {
+          pino.error(err);
+          reject(error)
+        } else {
+          pino.info("Subscription Added", r);
+          resolve(r);
+        }
+      })
     })
+    return result;
   },
   deleteSubscription(subscription, item) {
     subscription.deleteOne({ _id: item.id }, function (error, results) {
