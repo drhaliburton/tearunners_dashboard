@@ -6,4 +6,4 @@ module.exports = merge(prodEnv, {
   API_SHIPMENTS_URL: '"http://api.cratejoy.com/v1/shipments/"',
   API_AUTH: '"Basic dGVhX3J1bm5lcnM6TjBxeHFMcHRqRnFNMTdrMg=="',
   BASE_URL: '"http://localhost:8081"'
-})
+});
