@@ -60,7 +60,7 @@ MongoClient.connect(url, options, function (err, client) {
 	});
 
 
-	let next = '?page=550';
+	let next = '?page=800';
 
 	app.get('/api/shipments/', (req, res) => {
 		let params = req.query.next ? req.query.next : next;
@@ -215,6 +215,7 @@ MongoClient.connect(url, options, function (err, client) {
 
 					cratejoyData.results.map(item => {
 						let cratejoyId = item.id;
+						console.log(item.status);
 
 						for (var subscription in subscriptionDb) {
 							if (subscriptionDb[subscription]["_id"] === cratejoyId) {
@@ -272,80 +273,6 @@ MongoClient.connect(url, options, function (err, client) {
 			res.send({ success: true })
 		}
 	})
-
-	// app.get('/api/subscriptions', (req, res) => {
-	// 	let params = req.query.next ? req.query.next : subNext ? encodeURIComponent(subNext) : subPrev;
-	// 	let options = {
-	// 		url: 'http://api.cratejoy.com/v1/subscriptions/' + params,
-	// 		headers: {
-	// 			'User-Agent': 'request',
-	// 			Authorization: process.env.API_AUTH,
-	// 		},
-	// 	}
-	// 	pino.info(params);
-	// 	if (params) {
-
-	// 		let subscriptionRequest = new Promise((resolve, reject) => {
-	// 			request.get(options, (error, response, body) => {
-	// 				if (error) {
-	// 					if (response.statusCode !== 502) {
-	// 						throw error;
-	// 					}
-	// 				}
-	// 				if (response.statusCode === 200) {
-	// 					let data = JSON.parse(body);
-	// 					resolve(data);
-	// 				}
-	// 			})
-	// 		})
-
-	// 		subscriptionRequest.then(subscriptionData => {
-	// 			subscriptionData.results.map(item => {
-	// 				let _id = item.id;
-	// 				let count = subscription.count({ _id })
-	// 				count.then(results => {
-	// 					if (results == 0) {
-	// 						if (item.status === 'active') {
-	// 							let itemObj = helpers.buildSubscription(item);
-	// 							helpers.postSubscription(subscription, itemObj);
-	// 						}
-	// 					} else {
-	// 						if (item.status !== 'active') {
-	// 							helpers.deleteSubscription(subscription, item);
-	// 						}
-	// 					}
-	// 				})
-	// 			})
-	// 			if (subscriptionData.next) {
-	// 				subNext = subscriptionData.next;
-	// 				return subscriptionData.next;
-	// 			} else {
-	// 				subPrev = subNext;
-	// 			}
-	// 		})
-	// 			.then(next => {
-	// 				if (next) {
-	// 					let query = decodeURIComponent(next);
-	// 					let options = {
-	// 						url: process.env.BASE_URL + 'api/subscriptions/',
-	// 						qs: {
-	// 							next: query,
-	// 						}
-	// 					}
-	// 					request.get(options, function (error, response, body) {
-	// 						if (error) {
-	// 							pino.error(error);
-	// 						}
-	// 					}).end()
-	// 				}
-	// 			})
-	// 			.catch(err => {
-	// 				pino.error(err);
-	// 			})
-	// 	} else {
-	// 		res.send({ success: true })
-	// 	}
-	// })
 
 	const server = app.listen(process.env.PORT || 8081)
 	server.timeout = 240000;

@@ -1,7 +1,7 @@
 module.exports = {
   productCount: {
     0: {
-      title: "January",
+      title: "December",
       month: 0,
       count: {
         atotal: {
@@ -23,7 +23,7 @@ module.exports = {
       }
     },
     1: {
-      title: "February",
+      title: "January",
       month: 1,
       count: {
         atotal: {
@@ -45,7 +45,7 @@ module.exports = {
       }
     },
     2: {
-      title: "March",
+      title: "February",
       month: 2,
       count: {
         atotal: {
@@ -67,7 +67,7 @@ module.exports = {
       }
     },
     3: {
-      title: "April",
+      title: "March",
       month: 3,
       count: {
         atotal: {
@@ -89,7 +89,7 @@ module.exports = {
       }
     },
     4: {
-      title: "May",
+      title: "April",
       month: 4,
       atotal: 0,
       count: {
@@ -112,7 +112,7 @@ module.exports = {
       }
     },
     5: {
-      title: "June",
+      title: "May",
       month: 5,
       atotal: 0,
       count: {
@@ -135,7 +135,7 @@ module.exports = {
       }
     },
     6: {
-      title: "July",
+      title: "June",
       month: 6,
       atotal: 0,
       count: {
@@ -158,7 +158,7 @@ module.exports = {
       }
     },
     7: {
-      title: "August",
+      title: "July",
       month: 7,
       atotal: 0,
       count: {
@@ -181,7 +181,7 @@ module.exports = {
       }
     },
     8: {
-      title: "September",
+      title: "August",
       month: 8,
       count: {
         atotal: {
@@ -203,7 +203,7 @@ module.exports = {
       }
     },
     9: {
-      title: "October",
+      title: "September",
       month: 9,
       count: {
         atotal: {
@@ -225,7 +225,7 @@ module.exports = {
       }
     },
     10: {
-      title: "November",
+      title: "October",
       month: 10,
       count: {
         atotal: {
@@ -247,7 +247,7 @@ module.exports = {
       }
     },
     11: {
-      title: "December",
+      title: "November",
       month: 11,
       count: {
         atotal: {

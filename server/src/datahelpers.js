@@ -118,11 +118,6 @@ module.exports = {
     let month = shipmentDate.getMonth() + 1;
     let date = shipmentDate.getDate();
 
-    if (date >= 16) {
-      month + 1
-    } else {
-      month + 2
-    }
     let shipmentMonth = month > 11 ? month - 12 : month;
     return shipmentMonth;
   },
